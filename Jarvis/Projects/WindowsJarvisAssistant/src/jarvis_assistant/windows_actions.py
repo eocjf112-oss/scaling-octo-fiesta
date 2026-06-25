@@ -112,7 +112,7 @@ def search_files(config: JarvisConfig, query: str) -> ActionResult:
 
 
 def organize_files(config: JarvisConfig) -> ActionResult:
-    source = (config.workspace_root / "Downloads").resolve()
+    source = (config.downloads_dir or config.workspace_root / "Downloads").resolve()
     if not source.exists():
         source.mkdir(parents=True, exist_ok=True)
         return ActionResult("organize", True, f"정리할 Downloads 폴더를 생성했습니다: {source}")

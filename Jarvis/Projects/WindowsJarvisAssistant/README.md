@@ -34,6 +34,8 @@ WindowsJarvisAssistant/
 ├── docs/windows_execution_test_guide.md
 ├── scripts/windows/
 │   ├── install-startup.ps1
+│   ├── jarvis-gui.ps1
+│   ├── jarvis-tray.ps1
 │   ├── jarvis-voice.ps1
 │   ├── test-jarvis.ps1
 │   └── run-jarvis.ps1
@@ -81,6 +83,8 @@ Windows에서는 먼저 다음 명령을 사용할 수 있습니다.
 
 ```bat
 Jarvis.bat
+Jarvis.bat gui
+Jarvis.bat settings
 Jarvis.bat selftest
 Jarvis.bat test
 Jarvis.bat providers
@@ -99,6 +103,24 @@ Jarvis.bat "Jarvis 현재 상태를 알려줘"
 
 `Jarvis.bat`을 인자 없이 실행하거나 더블클릭하면 시스템 트레이 대기 상태로 들어갑니다.
 트레이 상태에서는 음성 리스너가 함께 실행되어 "자비스" 또는 "Jarvis" 호출어를 기다립니다.
+
+명령어를 외우지 않고 사용하려면 클릭형 제어판을 엽니다.
+
+```bat
+Jarvis.bat gui
+```
+
+설정창만 바로 열려면 다음을 실행합니다.
+
+```bat
+Jarvis.bat settings
+```
+
+설정창에서 변경할 수 있는 항목:
+
+- Memory DB 경로
+- 다운로드 정리 대상 폴더
+- 프로젝트 폴더
 
 Windows 실제 실행 테스트는 다음 명령으로 한 번에 확인할 수 있습니다.
 
@@ -177,6 +199,8 @@ Jarvis.bat env
 JARVIS_DEFAULT_PROVIDER=local
 JARVIS_PROVIDER_PRIORITY=windows_automation,open_interpreter,local,chatgpt,claude
 JARVIS_MEMORY_DB_PATH=
+JARVIS_DOWNLOADS_DIR=
+JARVIS_PROJECTS_DIR=
 OPENAI_API_KEY=
 ANTHROPIC_API_KEY=
 ```
@@ -219,6 +243,8 @@ Windows Batch 래퍼:
 
 ```bat
 Jarvis.bat "오늘 할 일을 정리해줘"
+Jarvis.bat gui
+Jarvis.bat settings
 Jarvis.bat providers
 Jarvis.bat test
 Jarvis.bat selftest
@@ -295,6 +321,40 @@ Memory DB는 개인 장기 기억이므로 Git에 커밋하지 않습니다.
 
 ## Windows 실사용 기능
 
+### 클릭형 GUI
+
+```bat
+Jarvis.bat gui
+```
+
+GUI 버튼:
+
+- 전체 테스트
+- 메모장 열기
+- PDF 생성
+- 엑셀 생성
+- 워드 생성
+- 다운로드 정리
+- 인터넷 검색
+- 장기 기억 보기
+- 음성 대기 시작
+- 시작 자동 실행 등록/제거
+- 설정 열기
+
+### 설정창
+
+```bat
+Jarvis.bat settings
+```
+
+설정창에서 다음 경로를 변경할 수 있습니다.
+
+- Memory DB
+- 다운로드 폴더
+- 프로젝트 폴더
+
+저장된 값은 `.env`에 기록되며, 이후 새로 실행되는 Jarvis 명령부터 적용됩니다.
+
 ### 시작 시 자동 실행
 
 ```bat
@@ -332,6 +392,9 @@ Jarvis.bat
 
 트레이 아이콘 메뉴에서 다음 작업을 할 수 있습니다.
 
+- Jarvis 제어판 열기
+- 설정 열기
+- 테스트 메뉴 클릭 실행
 - Jarvis 상태 보기
 - Memory 상태 보기
 - 음성 리스너 시작/중지

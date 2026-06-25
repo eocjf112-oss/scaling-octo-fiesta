@@ -18,6 +18,8 @@ if /I "%~1"=="providers" goto list_providers
 if /I "%~1"=="voice" goto voice_status
 if /I "%~1"=="listen" goto voice_listen
 if /I "%~1"=="tray" goto tray_start
+if /I "%~1"=="gui" goto gui_start
+if /I "%~1"=="settings" goto settings_start
 if /I "%~1"=="memory" goto memory_status
 if /I "%~1"=="startup" goto startup
 if /I "%~1"=="windows" goto windows_automation
@@ -78,6 +80,18 @@ exit /b %ERRORLEVEL%
 call :require_powershell
 if errorlevel 1 exit /b %ERRORLEVEL%
 powershell -NoProfile -ExecutionPolicy Bypass -STA -File "%JARVIS_DIR%scripts\windows\jarvis-tray.ps1"
+exit /b %ERRORLEVEL%
+
+:gui_start
+call :require_powershell
+if errorlevel 1 exit /b %ERRORLEVEL%
+powershell -NoProfile -ExecutionPolicy Bypass -STA -File "%JARVIS_DIR%scripts\windows\jarvis-gui.ps1"
+exit /b %ERRORLEVEL%
+
+:settings_start
+call :require_powershell
+if errorlevel 1 exit /b %ERRORLEVEL%
+powershell -NoProfile -ExecutionPolicy Bypass -STA -File "%JARVIS_DIR%scripts\windows\jarvis-gui.ps1" -Settings
 exit /b %ERRORLEVEL%
 
 :memory_status
@@ -175,6 +189,12 @@ echo     "자비스" 호출어를 기다리는 음성 리스너를 실행합니�
 echo.
 echo   Jarvis.bat tray
 echo     시스템 트레이에 Jarvis를 상주시킵니다. 인자 없이 Jarvis.bat을 실행해도 이 모드로 시작합니다.
+echo.
+echo   Jarvis.bat gui
+echo     클릭형 Jarvis 제어판을 엽니다.
+echo.
+echo   Jarvis.bat settings
+echo     Memory DB, 다운로드 폴더, 프로젝트 폴더 설정창을 엽니다.
 echo.
 echo   Jarvis.bat memory
 echo     SQLite 장기 기억 상태를 출력합니다.

@@ -43,6 +43,8 @@ class JarvisConfig:
     workspace_root: Path = Path.cwd()
     env_file: Path | None = None
     memory_db_path: Path | None = None
+    downloads_dir: Path | None = None
+    projects_dir: Path | None = None
     openai_api_key: str | None = None
     openai_model: str = "gpt-4o-mini"
     anthropic_api_key: str | None = None
@@ -66,6 +68,8 @@ class JarvisConfig:
             workspace_root=workspace_root,
             env_file=env_file,
             memory_db_path=_get_path("JARVIS_MEMORY_DB_PATH") or workspace_root / "Memory" / "jarvis_memory.sqlite3",
+            downloads_dir=_get_path("JARVIS_DOWNLOADS_DIR") or workspace_root / "Downloads",
+            projects_dir=_get_path("JARVIS_PROJECTS_DIR") or workspace_root / "Projects",
             openai_api_key=os.getenv("OPENAI_API_KEY") or None,
             openai_model=os.getenv("JARVIS_OPENAI_MODEL", "gpt-4o-mini").strip() or "gpt-4o-mini",
             anthropic_api_key=os.getenv("ANTHROPIC_API_KEY") or None,

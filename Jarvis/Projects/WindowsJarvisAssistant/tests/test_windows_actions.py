@@ -63,6 +63,18 @@ class WindowsActionsTests(unittest.TestCase):
             self.assertTrue((downloads / "Documents" / "report.pdf").is_file())
             self.assertTrue((downloads / "Spreadsheets" / "data.csv").is_file())
 
+    def test_organize_files_uses_configured_downloads_directory(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            downloads = root / "CustomDownloads"
+            downloads.mkdir()
+            (downloads / "note.txt").write_text("txt", encoding="utf-8")
+
+            result = organize_files(JarvisConfig(workspace_root=root, downloads_dir=downloads))
+
+            self.assertTrue(result.success)
+            self.assertTrue((downloads / "Documents" / "note.txt").is_file())
+
     def test_internet_search_builds_google_url_without_api(self):
         with patch("jarvis_assistant.windows_actions.platform.system", return_value="Windows"), patch(
             "jarvis_assistant.windows_actions.webbrowser.open", return_value=True

@@ -50,6 +50,34 @@ python --version
 python -m pip install -e .
 ```
 
+### 클릭형 제어판 실행
+
+```bat
+Jarvis.bat gui
+```
+
+성공 기준:
+
+- `Jarvis 제어판` 창이 열립니다.
+- 버튼 클릭만으로 메모장, PDF 생성, 다운로드 정리, 인터넷 검색, Memory 확인을 실행할 수 있습니다.
+
+### 설정창 실행
+
+```bat
+Jarvis.bat settings
+```
+
+설정 가능한 항목:
+
+- Memory DB
+- 다운로드 폴더
+- 프로젝트 폴더
+
+성공 기준:
+
+- 설정 저장 후 `.env`에 값이 기록됩니다.
+- 이후 새로 실행되는 Jarvis 명령에서 해당 경로를 사용합니다.
+
 ## 4. 전체 자동 테스트
 
 ```bat
