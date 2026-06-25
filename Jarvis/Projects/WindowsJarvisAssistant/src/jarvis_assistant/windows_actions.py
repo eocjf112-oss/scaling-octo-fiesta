@@ -33,7 +33,7 @@ def run_windows_action(command: str, config: JarvisConfig) -> ActionResult:
         return create_word_document(config, command)
     if _has_any(normalized, ("pdf", "피디에프")):
         return create_pdf_document(config, command)
-    if _has_any(normalized, ("search file", "file search", "파일 검색", "찾아", "검색")):
+    if _has_any(normalized, ("search", "find", "search file", "file search", "파일 검색", "찾아", "검색")):
         return search_files(config, _extract_query(command))
     if _has_any(normalized, ("organize", "정리", "분류")):
         return organize_files(config)
@@ -141,6 +141,8 @@ def launch_program(program: str) -> ActionResult:
 def internet_search(query: str) -> ActionResult:
     query = query.strip() or "Jarvis Windows automation"
     url = f"https://www.google.com/search?q={quote_plus(query)}"
+    if platform.system().lower() != "windows":
+        return ActionResult("web", True, f"현재 OS는 Windows가 아니므로 브라우저를 열지 않았습니다. Windows에서는 열립니다: {url}")
     opened = webbrowser.open(url)
     status = "브라우저를 열었습니다" if opened else "브라우저를 열 수 없어 URL만 반환합니다"
     return ActionResult("web", True, f"{status}: {url}")
