@@ -1,0 +1,12 @@
+Jarvis
+│
+├── AI
+├── Memory
+├── Projects
+├── Documents
+├── Downloads
+├── Automation
+├── Voice
+├── Logs
+├── Prompt
+└── Temp
