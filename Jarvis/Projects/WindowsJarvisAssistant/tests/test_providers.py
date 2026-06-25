@@ -23,11 +23,12 @@ class ProviderAvailabilityTests(unittest.TestCase):
         self.assertTrue(ClaudeProvider(JarvisConfig(anthropic_api_key="key")).is_available())
 
     def test_open_interpreter_uses_command_lookup(self):
-        provider = OpenInterpreterProvider(JarvisConfig(open_interpreter_command="interpreter"))
+        provider = OpenInterpreterProvider(JarvisConfig(open_interpreter_command="missing-interpreter"))
 
         with patch("jarvis_assistant.providers.open_interpreter_provider.shutil.which", return_value=None):
             self.assertFalse(provider.is_available())
 
+        provider = OpenInterpreterProvider(JarvisConfig(open_interpreter_command="interpreter"))
         with patch("jarvis_assistant.providers.open_interpreter_provider.shutil.which", return_value="/bin/interpreter"):
             self.assertTrue(provider.is_available())
 
