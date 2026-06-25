@@ -1,0 +1,79 @@
+# ════════════════════════════════════════════════
+#  Jarvis AI Assistant — 시스템 설정
+# ════════════════════════════════════════════════
+
+jarvis:
+  name: "Jarvis"
+  version: "1.0.0"
+  language: "ko"                    # 기본 응답 언어
+  workspace: "C:/Jarvis"            # Windows 워크스페이스 루트
+
+# ── AI 모델 설정 ─────────────────────────────
+ai:
+  default: "auto"                   # auto | chatgpt | claude | interpreter
+
+  chatgpt:
+    model: "gpt-4o"
+    max_tokens: 4096
+    temperature: 0.7
+    stream: true
+    # 적합한 작업: 일반 대화, 창의적 글쓰기, 빠른 답변
+
+  claude:
+    model: "claude-3-5-sonnet-20241022"
+    max_tokens: 8192
+    temperature: 0.7
+    stream: true
+    # 적합한 작업: 긴 문서 분석, 깊은 추론, 코드 리뷰
+
+  interpreter:
+    model: "gpt-4o"
+    auto_run: false                 # 코드 자동 실행 여부 (보안상 false 권장)
+    safe_mode: "ask"                # off | ask | auto
+    # 적합한 작업: 코드 실행, 파일 조작, 시스템 자동화
+
+# ── 라우터 설정 (auto 모드에서 AI 자동 선택) ──
+router:
+  rules:
+    - keywords: ["코드 실행", "파일 만들어", "스크립트", "자동화", "실행해줘", "run", "execute"]
+      ai: "interpreter"
+    - keywords: ["분석", "검토", "리뷰", "요약해줘", "설명해줘", "긴 글", "문서"]
+      ai: "claude"
+    - keywords: ["아이디어", "창의", "브레인스토밍", "도와줘", "추천"]
+      ai: "chatgpt"
+  default: "chatgpt"               # 규칙에 해당 없으면 ChatGPT
+
+# ── 메모리 설정 ─────────────────────────────
+memory:
+  auto_save: true
+  save_interval: 10                # N 번 대화마다 자동 저장
+  max_sessions: 50
+  memory_file: "MEMORY.md"
+  session_id_format: "JARVIS-{date}-{seq:03d}"
+
+# ── 로깅 설정 ───────────────────────────────
+logging:
+  level: "INFO"
+  format: "{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}"
+  log_dir: "Logs"
+  max_file_size: "10 MB"
+  retention: "30 days"
+
+# ── CLI 설정 ────────────────────────────────
+cli:
+  prompt_symbol: "🤖 Jarvis > "
+  user_symbol: "👤 You > "
+  show_ai_label: true              # 응답 시 어떤 AI인지 표시
+  history_file: ".jarvis_history"  # 입력 히스토리 파일
+  max_history: 1000
+
+# ── 시스템 프롬프트 ──────────────────────────
+system_prompt: |
+  당신은 Jarvis입니다. 사용자의 개인 AI 엔지니어이자 수석 보좌관입니다.
+  
+  핵심 원칙:
+  - 한국어로 명확하고 직접적으로 소통하세요
+  - 단순히 지시를 따르는 것이 아닌, 더 나은 방법을 제안하세요
+  - 코드는 항상 동작하는 완성본으로 제공하세요
+  - 중요한 결정은 사용자에게 확인 후 진행하세요
+  - 불확실한 정보는 사실처럼 제시하지 마세요
