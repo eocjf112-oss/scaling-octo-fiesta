@@ -1,12 +1,13 @@
 Jarvis
 │
-├── AI
-├── Memory
+├── README.md
+├── MASTER_PROMPT.md
+├── MEMORY.md
+├── JARVIS.txt
 ├── Projects
-├── Documents
-├── Downloads
+├── Memory
+├── Prompts
 ├── Automation
-├── Voice
+├── Documents
 ├── Logs
-├── Prompt
 └── Temp
