@@ -9,8 +9,8 @@
 ## 📅 마지막 업데이트
 
 **날짜:** 2026년 6월 25일  
-**세션 ID:** JARVIS-INIT-001  
-**상태:** 초기화 완료 ✅
+**세션 ID:** JARVIS-DEV-002  
+**상태:** jarvis-core v1.0 개발 완료 ✅
 
 ---
 
@@ -48,7 +48,9 @@
 | 프로젝트 이름 | 상태 | 우선순위 | 마지막 업데이트 |
 |--------------|------|---------|----------------|
 | Jarvis 워크스페이스 설정 | ✅ 완료 | 높음 | 2026-06-25 |
-| *(다음 프로젝트)* | - | - | - |
+| jarvis-core (AI 통합 엔진) | ✅ v1.0 완료 | 최높음 | 2026-06-25 |
+| Windows GUI (Phase 2) | 🔲 계획 중 | 중간 | - |
+| 음성 인터페이스 (Phase 3) | 🔲 계획 중 | 낮음 | - |
 
 ---
 
@@ -122,6 +124,37 @@ Git 브랜치: cursor/jarvis-workspace-setup-b80e
 **다음 세션 목표:**
 - 사용자 프로필 업데이트
 - 첫 번째 실제 프로젝트 착수
+
+### 세션 002 — 2026년 6월 25일
+**목표:** Windows용 Jarvis AI Assistant 개발 — Open Interpreter + ChatGPT + Claude 통합
+
+**완료 작업:**
+- `Projects/jarvis-core/` 프로젝트 구조 생성 (8개 모듈 디렉토리)
+- `config.py` — Pydantic 기반 환경 설정 관리자
+- `providers/base_provider.py` — AI 프로바이더 추상 기본 클래스
+- `providers/openai_provider.py` — ChatGPT (GPT-4o) 스트리밍 연동
+- `providers/claude_provider.py` — Claude (claude-opus-4-5) 스트리밍 연동
+- `providers/interpreter_provider.py` — Open Interpreter 로컬 실행 연동
+- `memory/memory_manager.py` — JSON + MEMORY.md 장기 기억 시스템
+- `memory/session_manager.py` — 세션 생명주기 및 로그 관리
+- `orchestrator.py` — 3개 AI를 자동 라우팅하는 통합 오케스트레이터
+- `cli.py` — Rich 기반 아름다운 터미널 UI
+- `jarvis.py` — Click 기반 메인 진입점 (단일/대화형 모드)
+- `prompts/system_prompts.py` — 역할별 시스템 프롬프트 라이브러리
+- `setup.bat`, `start_jarvis.bat`, `start_jarvis.ps1` — Windows 런처
+- `setup.sh`, `start_jarvis.sh` — Linux/macOS 런처
+- `tests/` — 20개 단위 테스트 (모두 통과 ✅)
+
+**학습 내용:**
+- Open Interpreter는 Windows에서 PowerShell을 기본 셸로 사용
+- Claude API는 system 메시지를 별도 파라미터로 전달해야 함
+- Rich 라이브러리로 스트리밍 응답을 실시간 출력 가능
+- Pydantic v2로 설정 검증 및 타입 안전성 확보
+
+**다음 세션 목표:**
+- API 키 연결 후 실제 대화 테스트
+- Windows GUI (Tkinter 또는 Electron) 개발 검토
+- 음성 입출력 모듈 (Phase 3) 설계
 
 ---
 

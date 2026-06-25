@@ -1,0 +1,40 @@
+# 환경 설정 (절대 커밋 금지)
+.env
+*.env.local
+*.env.production
+
+# 가상환경
+venv/
+.venv/
+env/
+
+# Python 캐시
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# 테스트 결과
+.pytest_cache/
+.coverage
+htmlcov/
+
+# 로그 파일
+*.log
+Logs/
+
+# IDE
+.vscode/settings.json
+.idea/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# Jarvis 런타임 데이터
+jarvis_memory.json
+*.session.json
