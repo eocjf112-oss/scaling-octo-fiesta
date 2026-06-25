@@ -64,12 +64,24 @@ class WindowsActionsTests(unittest.TestCase):
             self.assertTrue((downloads / "Spreadsheets" / "data.csv").is_file())
 
     def test_internet_search_builds_google_url_without_api(self):
-        with patch("jarvis_assistant.windows_actions.webbrowser.open", return_value=True) as opened:
+        with patch("jarvis_assistant.windows_actions.platform.system", return_value="Windows"), patch(
+            "jarvis_assistant.windows_actions.webbrowser.open", return_value=True
+        ) as opened:
             result = internet_search("자비스 자동화")
 
         self.assertTrue(result.success)
         self.assertIn("https://www.google.com/search?q=", result.message)
         opened.assert_called_once()
+
+    def test_internet_search_does_not_open_browser_outside_windows(self):
+        with patch("jarvis_assistant.windows_actions.platform.system", return_value="Linux"), patch(
+            "jarvis_assistant.windows_actions.webbrowser.open", return_value=True
+        ) as opened:
+            result = internet_search("자비스 자동화")
+
+        self.assertTrue(result.success)
+        self.assertIn("브라우저를 열지 않았습니다", result.message)
+        opened.assert_not_called()
 
     def test_run_windows_action_dispatches_excel(self):
         with tempfile.TemporaryDirectory() as temp_dir:
