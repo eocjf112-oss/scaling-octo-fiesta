@@ -18,7 +18,9 @@
 - [x] ChatGPT, Claude, Open Interpreter Provider 우선순위 설정 추가
 - [x] Provider Registry와 자동 Router 추가
 - [x] CLI 진입점 추가
+- [x] ChatGPT/Claude/Open Interpreter 통합 연결 테스트 명령 추가
 - [x] Windows PowerShell 실행 스크립트 추가
+- [x] Windows `Jarvis.bat` 실행 파일 추가
 - [x] 기본 단위 테스트 추가
 
 ## 2. Windows 데스크톱 실행 기반
@@ -71,7 +73,8 @@
 
 ## 다음 즉시 작업
 
-1. Open Interpreter 실행 로그 Sanitizer 추가
-2. 실행 전 명령 Preview/승인 UI 설계
-3. CLI 대화형 모드 추가
-4. 대화 메모리 저장소의 최소 구현 추가
+1. 실제 API 키 입력 후 `Jarvis.bat test`로 ChatGPT/Claude 응답 확인
+2. Open Interpreter 실행 로그 Sanitizer 추가
+3. 실행 전 명령 Preview/승인 UI 설계
+4. CLI 대화형 모드 추가
+5. 대화 메모리 저장소의 최소 구현 추가

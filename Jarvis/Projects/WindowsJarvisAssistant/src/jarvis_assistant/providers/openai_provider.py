@@ -28,11 +28,14 @@ class ChatGPTProvider:
             messages.append({"role": "system", "content": request.system_prompt})
         messages.append({"role": "user", "content": request.prompt})
 
-        response = client.chat.completions.create(
-            model=self._config.openai_model,
-            messages=messages,
-            temperature=request.temperature,
-        )
+        kwargs = {
+            "model": self._config.openai_model,
+            "messages": messages,
+        }
+        if request.temperature is not None:
+            kwargs["temperature"] = request.temperature
+
+        response = client.chat.completions.create(**kwargs)
         content = response.choices[0].message.content or ""
         return ChatResponse(
             provider=self.name,

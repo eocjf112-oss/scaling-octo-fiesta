@@ -4,6 +4,7 @@ import argparse
 import sys
 
 from jarvis_assistant.config import JarvisConfig
+from jarvis_assistant.diagnostics import format_provider_checks, run_provider_checks
 from jarvis_assistant.models import ChatRequest, ProviderError
 from jarvis_assistant.router import JarvisRouter
 
@@ -29,6 +30,16 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Open Interpreter가 로컬 파일/명령 작업을 수행할 수 있음을 명시적으로 확인",
     )
+    parser.add_argument(
+        "--test-providers",
+        action="store_true",
+        help="ChatGPT, Claude, Open Interpreter 연결 상태를 점검",
+    )
+    parser.add_argument(
+        "--test-prompt",
+        default="Jarvis 연결 테스트입니다. 한국어로 연결 성공이라고 짧게 답하세요.",
+        help="--test-providers에서 ChatGPT/Claude에 보낼 테스트 프롬프트",
+    )
     return parser
 
 
@@ -44,8 +55,13 @@ def main(argv: list[str] | None = None) -> int:
         print("\n".join(providers) if providers else "No providers available.")
         return 0
 
+    if args.test_providers:
+        checks = run_provider_checks(config, args.test_prompt)
+        print(format_provider_checks(checks))
+        return 0
+
     if not args.prompt:
-        parser.error("prompt is required unless --list-providers is used.")
+        parser.error("prompt is required unless --list-providers or --test-providers is used.")
 
     request = ChatRequest(
         prompt=args.prompt,

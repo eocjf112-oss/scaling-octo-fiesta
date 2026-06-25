@@ -16,6 +16,7 @@ Windows Jarvis AI Assistant는 Open Interpreter, ChatGPT, Claude를 하나의 �
 ```text
 WindowsJarvisAssistant/
 ├── CHECKLIST.md
+├── Jarvis.bat
 ├── README.md
 ├── pyproject.toml
 ├── .env.example
@@ -88,7 +89,38 @@ JARVIS_OPEN_INTERPRETER_REQUIRE_CONFIRMATION=true
 
 운영체제 환경 변수가 이미 설정되어 있으면 `.env`보다 우선합니다.
 
-### 3. 실행
+### 3. Windows에서 .env 열기
+
+Windows에서는 다음 명령으로 `.env`를 메모장으로 열 수 있습니다.
+
+```bat
+Jarvis.bat env
+```
+
+열린 `.env`에서 아래 두 줄의 등호 뒤에 실제 키를 입력하고 저장합니다.
+
+```env
+OPENAI_API_KEY=
+ANTHROPIC_API_KEY=
+```
+
+### 4. 연결 테스트
+
+API 키를 저장한 뒤 다음 명령을 실행하면 Jarvis가 ChatGPT, Claude, Open Interpreter 연결 상태를 한 번에 확인합니다.
+
+```bat
+Jarvis.bat test
+```
+
+동일한 테스트를 Python CLI로 실행할 수도 있습니다.
+
+```powershell
+python -m jarvis_assistant --test-providers
+```
+
+API 키가 비어 있으면 ChatGPT/Claude는 실제 호출을 하지 않고 `건너뜀`으로 표시됩니다. 키가 있으면 실제 API 요청을 보내고 응답 미리보기를 출력합니다.
+
+### 5. 실행
 
 ```powershell
 python -m jarvis_assistant "오늘 할 일을 정리해줘"
@@ -100,6 +132,14 @@ Windows PowerShell 래퍼:
 
 ```powershell
 .\scripts\windows\run-jarvis.ps1 -Prompt "내 PC 상태를 점검해줘" -Provider auto -ConfirmLocalExecution
+```
+
+Windows Batch 래퍼:
+
+```bat
+Jarvis.bat "오늘 할 일을 정리해줘"
+Jarvis.bat providers
+Jarvis.bat test
 ```
 
 Open Interpreter의 자세한 안전 정책은 `docs/open_interpreter_integration.md`를 참고하세요.

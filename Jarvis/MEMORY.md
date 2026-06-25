@@ -171,6 +171,23 @@ Git 브랜치: cursor/jarvis-workspace-setup-b80e
 - Provider별 실패 fallback 정책 강화
 - 통합 대화 모드에서 세 Provider를 선택/전환하는 UX 추가
 
+### 세션 005 — 2026년 6월 25일
+**목표:** API 키 입력 및 Jarvis.bat 기반 Provider 테스트 준비
+
+**완료 작업:**
+- OpenAI/Anthropic SDK 설치 상태 확인
+- 현재 `.env`의 `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`가 비어 있음을 확인
+- Windows용 `Jarvis.bat` 추가
+- `Jarvis.bat env`로 `.env`를 메모장으로 열 수 있게 구성
+- `Jarvis.bat test`로 ChatGPT, Claude, Open Interpreter 연결 상태를 한 번에 점검하도록 구성
+- `python -m jarvis_assistant --test-providers` 진단 명령 추가
+- API 키가 비어 있으면 실제 호출 없이 `건너뜀`으로 보고하고, 키가 있으면 실제 API 호출을 수행하는 구조 준비
+
+**다음 세션 목표:**
+- 사용자가 실제 API 키를 `.env`에 입력한 뒤 `Jarvis.bat test` 실행
+- ChatGPT/Claude 실제 응답 확인
+- Provider 실패 시 자동 fallback 정책 강화
+
 ---
 
 ## 📝 메모 및 아이디어 (Notes & Ideas)
