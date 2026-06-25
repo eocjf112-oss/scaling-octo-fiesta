@@ -33,12 +33,12 @@ def run_windows_action(command: str, config: JarvisConfig) -> ActionResult:
         return create_word_document(config, command)
     if _has_any(normalized, ("pdf", "피디에프")):
         return create_pdf_document(config, command)
+    if _has_any(normalized, ("internet", "web", "browser", "인터넷", "웹", "구글")):
+        return internet_search(_extract_query(command))
     if _has_any(normalized, ("search", "find", "search file", "file search", "파일 검색", "찾아", "검색")):
         return search_files(config, _extract_query(command))
     if _has_any(normalized, ("organize", "정리", "분류")):
         return organize_files(config)
-    if _has_any(normalized, ("internet", "web", "browser", "인터넷", "웹", "구글")):
-        return internet_search(_extract_query(command))
     if _has_any(normalized, ("run ", "launch", "open program", "프로그램 실행", "실행", "열어", "켜줘", "열어줘")):
         return launch_program(_extract_program_name(command))
     return ActionResult(
