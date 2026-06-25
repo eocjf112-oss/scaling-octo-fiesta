@@ -16,6 +16,8 @@
 - [x] `.env` 자동 로딩 추가
 - [x] OpenAI/Anthropic API 키 입력 위치 문서화
 - [x] ChatGPT, Claude, Open Interpreter Provider 우선순위 설정 추가
+- [x] API 키 없이 동작하는 Local Jarvis Provider 추가
+- [x] API 키가 없어도 ChatGPT/Claude 호출이 오류 없이 안내 응답 반환
 - [x] Provider Registry와 자동 Router 추가
 - [x] CLI 진입점 추가
 - [x] ChatGPT/Claude/Open Interpreter 통합 연결 테스트 명령 추가
@@ -27,7 +29,8 @@
 
 - [ ] Windows 시작 메뉴/트레이 실행 방식 결정
 - [ ] 로컬 설정 파일 저장 위치 정의
-- [ ] 음성 입력/출력(Voice I/O) 후보 라이브러리 비교
+- [x] 음성 입력/출력(Voice I/O) 준비 인터페이스 추가
+- [x] Windows 자동화 Provider 추가
 - [x] 안전한 로컬 명령 실행 정책 설계
 - [ ] Windows 권한 상승이 필요한 작업 분리
 
@@ -73,8 +76,9 @@
 
 ## 다음 즉시 작업
 
-1. 실제 API 키 입력 후 `Jarvis.bat test`로 ChatGPT/Claude 응답 확인
-2. Open Interpreter 실행 로그 Sanitizer 추가
-3. 실행 전 명령 Preview/승인 UI 설계
-4. CLI 대화형 모드 추가
-5. 대화 메모리 저장소의 최소 구현 추가
+1. Open Interpreter 실행 로그 Sanitizer 추가
+2. 실행 전 명령 Preview/승인 UI 설계
+3. Windows 자동화 액션 확장: 앱 실행, 폴더 열기, 시스템 정보 수집
+4. 오프라인 STT/TTS 엔진 후보 연결
+5. CLI 대화형 모드 추가
+6. 대화 메모리 저장소의 최소 구현 추가

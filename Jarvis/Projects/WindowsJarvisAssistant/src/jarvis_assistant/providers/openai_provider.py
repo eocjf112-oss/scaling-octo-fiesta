@@ -15,7 +15,15 @@ class ChatGPTProvider:
 
     def complete(self, request: ChatRequest) -> ChatResponse:
         if not self.is_available():
-            raise ProviderError("OPENAI_API_KEY is required for ChatGPT provider.")
+            return ChatResponse(
+                provider=self.name,
+                content=(
+                    "ChatGPT Provider는 현재 비활성화되어 있습니다. "
+                    ".env의 OPENAI_API_KEY를 비워 둔 상태이므로 실제 API 호출을 하지 않았습니다. "
+                    "나중에 키를 입력하면 같은 구조에서 바로 사용할 수 있습니다."
+                ),
+                metadata={"missing_api_key": "OPENAI_API_KEY"},
+            )
 
         try:
             from openai import OpenAI

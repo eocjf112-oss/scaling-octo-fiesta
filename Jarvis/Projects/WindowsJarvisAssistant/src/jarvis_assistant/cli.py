@@ -7,6 +7,7 @@ from jarvis_assistant.config import JarvisConfig
 from jarvis_assistant.diagnostics import format_provider_checks, run_provider_checks
 from jarvis_assistant.models import ChatRequest, ProviderError
 from jarvis_assistant.router import JarvisRouter
+from jarvis_assistant.voice import format_voice_status, get_voice_capabilities
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -15,7 +16,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--provider",
         default="auto",
-        choices=["auto", "chatgpt", "claude", "open_interpreter"],
+        choices=["auto", "local", "windows_automation", "chatgpt", "claude", "open_interpreter"],
         help="사용할 Provider",
     )
     parser.add_argument("--system", dest="system_prompt", help="시스템 프롬프트")
@@ -34,6 +35,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--test-providers",
         action="store_true",
         help="ChatGPT, Claude, Open Interpreter 연결 상태를 점검",
+    )
+    parser.add_argument(
+        "--voice-status",
+        action="store_true",
+        help="Jarvis 음성 입출력 준비 상태를 점검",
     )
     parser.add_argument(
         "--test-prompt",
@@ -60,8 +66,14 @@ def main(argv: list[str] | None = None) -> int:
         print(format_provider_checks(checks))
         return 0
 
+    if args.voice_status:
+        print(format_voice_status(get_voice_capabilities()))
+        return 0
+
     if not args.prompt:
-        parser.error("prompt is required unless --list-providers or --test-providers is used.")
+        parser.error(
+            "prompt is required unless --list-providers, --test-providers, or --voice-status is used."
+        )
 
     request = ChatRequest(
         prompt=args.prompt,

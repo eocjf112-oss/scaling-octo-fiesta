@@ -5,8 +5,10 @@ from dataclasses import dataclass
 from jarvis_assistant.config import JarvisConfig
 from jarvis_assistant.models import ChatRequest, ProviderError
 from jarvis_assistant.providers.anthropic_provider import ClaudeProvider
+from jarvis_assistant.providers.local_provider import LocalJarvisProvider
 from jarvis_assistant.providers.open_interpreter_provider import OpenInterpreterProvider
 from jarvis_assistant.providers.openai_provider import ChatGPTProvider
+from jarvis_assistant.providers.windows_automation_provider import WindowsAutomationProvider
 
 
 @dataclass(frozen=True)
@@ -18,9 +20,11 @@ class ProviderCheck:
 
 def run_provider_checks(config: JarvisConfig, prompt: str) -> list[ProviderCheck]:
     checks = [
+        _check_always_available(LocalJarvisProvider(config), "API 없이 기본 응답을 제공합니다."),
+        _check_always_available(WindowsAutomationProvider(config), "Windows 자동화 준비 기능을 제공합니다."),
+        _check_open_interpreter(OpenInterpreterProvider(config)),
         _check_chat_provider(ChatGPTProvider(config), prompt, "OPENAI_API_KEY"),
         _check_chat_provider(ClaudeProvider(config), prompt, "ANTHROPIC_API_KEY"),
-        _check_open_interpreter(OpenInterpreterProvider(config)),
     ]
     return checks
 
@@ -36,8 +40,8 @@ def _check_chat_provider(provider, prompt: str, api_key_name: str) -> ProviderCh
     if not provider.is_available():
         return ProviderCheck(
             provider=provider.name,
-            status="건너뜀",
-            message=f"{api_key_name}가 비어 있어 실제 API 호출을 하지 않았습니다.",
+            status="선택 기능",
+            message=f"{api_key_name}가 비어 있어 비활성화되어 있습니다. API 없이도 Jarvis는 계속 동작합니다.",
         )
 
     try:
@@ -72,3 +76,7 @@ def _check_open_interpreter(provider: OpenInterpreterProvider) -> ProviderCheck:
         status="건너뜀",
         message="Open Interpreter CLI를 찾지 못했습니다.",
     )
+
+
+def _check_always_available(provider, message: str) -> ProviderCheck:
+    return ProviderCheck(provider=provider.name, status="준비됨", message=message)

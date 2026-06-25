@@ -32,8 +32,14 @@ def _get_tuple(name: str, default: tuple[str, ...]) -> tuple[str, ...]:
 
 @dataclass(frozen=True)
 class JarvisConfig:
-    default_provider: str = "chatgpt"
-    provider_priority: tuple[str, ...] = ("chatgpt", "claude", "open_interpreter")
+    default_provider: str = "local"
+    provider_priority: tuple[str, ...] = (
+        "windows_automation",
+        "open_interpreter",
+        "local",
+        "chatgpt",
+        "claude",
+    )
     workspace_root: Path = Path.cwd()
     env_file: Path | None = None
     openai_api_key: str | None = None
@@ -51,9 +57,10 @@ class JarvisConfig:
         env_file = load_env_file()
         workspace_root = _get_path("JARVIS_WORKSPACE_ROOT") or _discover_workspace_root()
         return cls(
-            default_provider=os.getenv("JARVIS_DEFAULT_PROVIDER", "chatgpt").strip() or "chatgpt",
+            default_provider=os.getenv("JARVIS_DEFAULT_PROVIDER", "local").strip() or "local",
             provider_priority=_get_tuple(
-                "JARVIS_PROVIDER_PRIORITY", ("chatgpt", "claude", "open_interpreter")
+                "JARVIS_PROVIDER_PRIORITY",
+                ("windows_automation", "open_interpreter", "local", "chatgpt", "claude"),
             ),
             workspace_root=workspace_root,
             env_file=env_file,

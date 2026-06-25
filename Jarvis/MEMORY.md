@@ -188,6 +188,25 @@ Git 브랜치: cursor/jarvis-workspace-setup-b80e
 - ChatGPT/Claude 실제 응답 확인
 - Provider 실패 시 자동 fallback 정책 강화
 
+### 세션 006 — 2026년 6월 25일
+**목표:** API 없이 사용할 수 있는 Jarvis 구조 완성
+
+**완료 작업:**
+- OpenAI/Anthropic API는 지금 연결하지 않는 방향으로 전환
+- 기본 Provider를 `local`로 변경하여 API 키 없이도 Jarvis가 항상 응답하도록 구성
+- Windows 자동화 Provider 추가
+- 음성 입출력 준비 모듈과 `--voice-status` 명령 추가
+- `Jarvis.bat voice`, `Jarvis.bat windows status`, `Jarvis.bat oi` 명령 추가
+- ChatGPT/Claude Provider는 키가 없어도 예외 대신 한국어 안내 응답을 반환하도록 변경
+- `.env.example`과 로컬 `.env` 기본값을 API 없는 구조로 변경
+- 추후 API 키를 추가하면 기존 Provider 구조에서 쉽게 활성화되도록 유지
+
+**다음 세션 목표:**
+- Open Interpreter 실행 로그 Sanitizer 구현
+- Windows 자동화 액션 확장: 앱 실행, 폴더 열기, 시스템 정보 수집
+- 오프라인 음성 입출력 엔진 후보 연결
+- CLI 대화형 모드 추가
+
 ---
 
 ## 📝 메모 및 아이디어 (Notes & Ideas)

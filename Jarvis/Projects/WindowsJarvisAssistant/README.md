@@ -1,12 +1,17 @@
 # Windows Jarvis AI Assistant
 
-Windows Jarvis AI Assistant는 Open Interpreter, ChatGPT, Claude를 하나의 로컬 AI 비서 시스템으로 연결하기 위한 프로젝트입니다.
+Windows Jarvis AI Assistant는 API 키 없이도 동작하는 로컬 AI 비서 시스템입니다.
+현재 기본 목표는 Open Interpreter, Windows 자동화, 음성 입출력 준비를 하나의 Jarvis 실행 파일로 연결하는 것입니다.
+ChatGPT와 Claude는 추후 API 키를 넣으면 같은 구조에서 쉽게 활성화할 수 있는 선택 기능으로 유지합니다.
 
 ## 목표
 
-- **ChatGPT**: 일반 대화, 문서 작성, 코드 설명, 빠른 질의응답
-- **Claude**: 긴 문맥 분석, 설계 검토, 문서/코드 리뷰
+- **Local Jarvis**: API 없이 기본 안내와 라우팅 제공
+- **Windows Automation**: Windows 상태 점검과 자동화 명령 라우팅 준비
 - **Open Interpreter**: Windows 로컬 파일, 명령, 자동화 작업 실행
+- **Voice I/O**: 음성 입력/출력 엔진을 연결할 수 있는 구조 준비
+- **ChatGPT**: 추후 OpenAI API 키 입력 시 활성화
+- **Claude**: 추후 Anthropic API 키 입력 시 활성화
 - **Jarvis Router**: 사용자 요청을 적절한 Provider로 라우팅하고 같은 인터페이스로 응답 반환
 
 ## 현재 구현 범위
@@ -25,12 +30,16 @@ WindowsJarvisAssistant/
 ├── src/jarvis_assistant/
 │   ├── cli.py
 │   ├── config.py
+│   ├── diagnostics.py
 │   ├── models.py
 │   ├── router.py
+│   ├── voice.py
 │   └── providers/
+│       ├── local_provider.py
 │       ├── anthropic_provider.py
 │       ├── open_interpreter_provider.py
 │       ├── openai_provider.py
+│       ├── windows_automation_provider.py
 │       └── registry.py
 └── tests/
 ```
@@ -46,12 +55,6 @@ py -3.11 -m venv .venv
 python -m pip install -e .
 ```
 
-실제 ChatGPT/Claude SDK 연동이 필요하면 다음 선택 의존성을 설치합니다.
-
-```powershell
-python -m pip install -e ".[ai]"
-```
-
 Open Interpreter 연동이 필요하면 다음 선택 의존성을 설치합니다.
 
 ```powershell
@@ -60,71 +63,72 @@ python -m pip install -e ".[interpreter]"
 
 > Open Interpreter 0.4.3은 `pkg_resources`를 사용하므로 현재는 `setuptools<81` 호환 설정이 필요합니다. `interpreter` extra에 이 제약을 포함했습니다.
 
-### 2. 환경 변수 설정
+### 2. API 없이 실행
 
-`.env.example`을 참고해 `.env`를 생성합니다. Jarvis CLI는 프로젝트 루트의 `.env`를 자동으로 읽습니다.
+Windows에서는 먼저 다음 명령을 사용할 수 있습니다.
 
-```powershell
-Copy-Item .env.example .env
+```bat
+Jarvis.bat test
+Jarvis.bat providers
+Jarvis.bat voice
+Jarvis.bat windows status
 ```
 
-`.env`에서 아래 위치에 실제 키를 입력합니다. 현재 저장소의 예시 파일과 로컬 `.env`는 모두 빈 값으로 유지합니다.
+일반 요청:
 
-```powershell
-OPENAI_API_KEY=
-ANTHROPIC_API_KEY=
-JARVIS_DEFAULT_PROVIDER=chatgpt
-JARVIS_PROVIDER_PRIORITY=chatgpt,claude,open_interpreter
-JARVIS_WORKSPACE_ROOT=C:\Users\you\Jarvis
+```bat
+Jarvis.bat "Jarvis 현재 상태를 알려줘"
 ```
 
-Open Interpreter CLI를 사용할 경우:
+Open Interpreter 요청:
 
-```powershell
-python -m pip install -e ".[interpreter]"
-JARVIS_OPEN_INTERPRETER_COMMAND=.\.venv\Scripts\interpreter.exe
-JARVIS_OPEN_INTERPRETER_WORKDIR=C:\Users\you\Jarvis\Temp\OpenInterpreter
-JARVIS_OPEN_INTERPRETER_REQUIRE_CONFIRMATION=true
+```bat
+Jarvis.bat oi "현재 폴더 구조를 요약해줘"
 ```
 
-운영체제 환경 변수가 이미 설정되어 있으면 `.env`보다 우선합니다.
+### 3. 환경 설정
 
-### 3. Windows에서 .env 열기
+`.env.example`을 참고해 `.env`를 생성합니다. `Jarvis.bat`은 `.env`가 없으면 자동으로 생성합니다.
 
-Windows에서는 다음 명령으로 `.env`를 메모장으로 열 수 있습니다.
+API 키는 지금 비워 두어도 됩니다.
 
 ```bat
 Jarvis.bat env
 ```
 
-열린 `.env`에서 아래 두 줄의 등호 뒤에 실제 키를 입력하고 저장합니다.
+기본값:
+
+```env
+JARVIS_DEFAULT_PROVIDER=local
+JARVIS_PROVIDER_PRIORITY=windows_automation,open_interpreter,local,chatgpt,claude
+OPENAI_API_KEY=
+ANTHROPIC_API_KEY=
+```
+
+운영체제 환경 변수가 이미 설정되어 있으면 `.env`보다 우선합니다.
+
+### 4. 추후 OpenAI/Claude API 연결
+
+나중에 ChatGPT/Claude가 필요하면 선택 의존성을 설치하고 `.env`에 키를 넣으면 됩니다.
+
+```powershell
+python -m pip install -e ".[ai]"
+```
 
 ```env
 OPENAI_API_KEY=
 ANTHROPIC_API_KEY=
 ```
 
-### 4. 연결 테스트
+키가 비어 있으면 Jarvis는 오류를 내지 않고 해당 Provider를 선택 기능으로 표시합니다.
 
-API 키를 저장한 뒤 다음 명령을 실행하면 Jarvis가 ChatGPT, Claude, Open Interpreter 연결 상태를 한 번에 확인합니다.
-
-```bat
-Jarvis.bat test
-```
-
-동일한 테스트를 Python CLI로 실행할 수도 있습니다.
+### 5. Python CLI
 
 ```powershell
+python -m jarvis_assistant "Jarvis 현재 상태를 알려줘"
 python -m jarvis_assistant --test-providers
-```
-
-API 키가 비어 있으면 ChatGPT/Claude는 실제 호출을 하지 않고 `건너뜀`으로 표시됩니다. 키가 있으면 실제 API 요청을 보내고 응답 미리보기를 출력합니다.
-
-### 5. 실행
-
-```powershell
-python -m jarvis_assistant "오늘 할 일을 정리해줘"
-python -m jarvis_assistant --provider claude "이 설계를 검토해줘"
+python -m jarvis_assistant --voice-status
+python -m jarvis_assistant --provider windows_automation "상태 점검"
 python -m jarvis_assistant --provider open_interpreter --confirm-local-execution "현재 폴더의 파일 목록을 요약해줘"
 ```
 
@@ -140,6 +144,9 @@ Windows Batch 래퍼:
 Jarvis.bat "오늘 할 일을 정리해줘"
 Jarvis.bat providers
 Jarvis.bat test
+Jarvis.bat voice
+Jarvis.bat windows status
+Jarvis.bat oi "현재 폴더를 요약해줘"
 ```
 
 Open Interpreter의 자세한 안전 정책은 `docs/open_interpreter_integration.md`를 참고하세요.
@@ -148,9 +155,11 @@ Open Interpreter의 자세한 안전 정책은 `docs/open_interpreter_integratio
 
 `--provider auto`는 다음 순서로 Provider를 선택합니다.
 
-1. 로컬 파일/명령/Windows 자동화 성격이면 Open Interpreter
-2. 기본 Provider(`JARVIS_DEFAULT_PROVIDER`)가 사용 가능하면 기본 Provider
-3. 사용 가능한 Provider 중 ChatGPT, Claude, Open Interpreter 순서로 선택
+1. Windows 자동화 상태/자동화 성격이면 Windows Automation
+2. 로컬 파일/명령 실행 성격이면 Open Interpreter
+3. 기본 Provider(`JARVIS_DEFAULT_PROVIDER`)가 사용 가능하면 기본 Provider
+4. 설정된 `JARVIS_PROVIDER_PRIORITY` 순서로 fallback
+5. 마지막에는 항상 Local Jarvis Provider로 안전 응답
 
 ## 테스트
 
@@ -160,7 +169,8 @@ python -m unittest discover -s tests
 
 ## 보안 메모
 
-- API 키는 코드나 문서에 저장하지 않습니다.
+- API 키는 선택 사항이며 코드나 문서에 저장하지 않습니다.
+- API 키가 없어도 Jarvis는 Local/Windows Automation/Open Interpreter 준비 경로로 동작합니다.
 - Open Interpreter는 로컬 명령을 실행할 수 있으므로 신뢰 가능한 프롬프트에만 사용합니다.
 - Jarvis는 Open Interpreter 실행 전 위험 요청을 차단하고, 로컬 실행 요청에는 `--confirm-local-execution` 확인을 요구합니다.
 - Open Interpreter 작업 디렉터리는 `JARVIS_WORKSPACE_ROOT` 내부로 제한됩니다.

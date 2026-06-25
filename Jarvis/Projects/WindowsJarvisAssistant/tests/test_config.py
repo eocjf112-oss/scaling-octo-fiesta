@@ -15,8 +15,11 @@ class JarvisConfigTests(unittest.TestCase):
         with patch.dict(os.environ, {}, clear=True):
             config = JarvisConfig.from_env()
 
-        self.assertEqual(config.default_provider, "chatgpt")
-        self.assertEqual(config.provider_priority, ("chatgpt", "claude", "open_interpreter"))
+        self.assertEqual(config.default_provider, "local")
+        self.assertEqual(
+            config.provider_priority,
+            ("windows_automation", "open_interpreter", "local", "chatgpt", "claude"),
+        )
         self.assertEqual(config.openai_model, "gpt-4o-mini")
         self.assertEqual(config.anthropic_model, "claude-3-5-sonnet-latest")
         self.assertEqual(config.open_interpreter_timeout_seconds, 120)

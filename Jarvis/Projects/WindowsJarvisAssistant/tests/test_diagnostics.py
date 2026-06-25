@@ -19,12 +19,14 @@ class DiagnosticsTests(unittest.TestCase):
         ):
             checks = run_provider_checks(config, "테스트")
 
-        self.assertEqual(checks[0].provider, "chatgpt")
-        self.assertEqual(checks[0].status, "건너뜀")
-        self.assertIn("OPENAI_API_KEY", checks[0].message)
-        self.assertEqual(checks[1].provider, "claude")
-        self.assertEqual(checks[1].status, "건너뜀")
-        self.assertIn("ANTHROPIC_API_KEY", checks[1].message)
+        by_provider = {check.provider: check for check in checks}
+
+        self.assertEqual(by_provider["local"].status, "준비됨")
+        self.assertEqual(by_provider["windows_automation"].status, "준비됨")
+        self.assertEqual(by_provider["chatgpt"].status, "선택 기능")
+        self.assertIn("OPENAI_API_KEY", by_provider["chatgpt"].message)
+        self.assertEqual(by_provider["claude"].status, "선택 기능")
+        self.assertIn("ANTHROPIC_API_KEY", by_provider["claude"].message)
 
     def test_format_provider_checks_outputs_korean_summary(self):
         config = JarvisConfig(openai_api_key=None, anthropic_api_key=None)
@@ -36,8 +38,10 @@ class DiagnosticsTests(unittest.TestCase):
             output = format_provider_checks(run_provider_checks(config, "테스트"))
 
         self.assertIn("Jarvis Provider 연결 테스트 결과", output)
-        self.assertIn("chatgpt: 건너뜀", output)
-        self.assertIn("claude: 건너뜀", output)
+        self.assertIn("local: 준비됨", output)
+        self.assertIn("windows_automation: 준비됨", output)
+        self.assertIn("chatgpt: 선택 기능", output)
+        self.assertIn("claude: 선택 기능", output)
         self.assertIn("open_interpreter: 준비됨", output)
 
 

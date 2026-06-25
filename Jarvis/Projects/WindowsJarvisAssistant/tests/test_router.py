@@ -67,6 +67,29 @@ class JarvisRouterTests(unittest.TestCase):
 
         self.assertEqual(selected, "open_interpreter")
 
+    def test_auto_routes_windows_automation_keywords(self):
+        registry = ProviderRegistry(
+            [
+                FakeProvider("local"),
+                FakeProvider("windows_automation"),
+                FakeProvider("open_interpreter"),
+            ]
+        )
+        router = JarvisRouter(JarvisConfig(default_provider="local"), registry)
+
+        selected = router.select_provider(ChatRequest(prompt="윈도우 자동화 상태 점검"))
+
+        self.assertEqual(selected, "windows_automation")
+
+    def test_auto_falls_back_to_local_provider(self):
+        registry = ProviderRegistry([FakeProvider("local")])
+        router = JarvisRouter(JarvisConfig(default_provider="chatgpt"), registry)
+
+        response = router.dispatch(ChatRequest(prompt="hello"))
+
+        self.assertEqual(response.provider, "local")
+        self.assertEqual(response.content, "local: hello")
+
     def test_dispatch_calls_selected_provider(self):
         registry = ProviderRegistry([FakeProvider("chatgpt")])
         router = JarvisRouter(JarvisConfig(default_provider="chatgpt"), registry)

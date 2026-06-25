@@ -11,6 +11,7 @@ from jarvis_assistant.models import ChatRequest, ProviderError
 from jarvis_assistant.providers.anthropic_provider import ClaudeProvider
 from jarvis_assistant.providers.open_interpreter_provider import OpenInterpreterProvider
 from jarvis_assistant.providers.openai_provider import ChatGPTProvider
+from jarvis_assistant.providers.windows_automation_provider import WindowsAutomationProvider
 
 
 class ProviderAvailabilityTests(unittest.TestCase):
@@ -21,6 +22,26 @@ class ProviderAvailabilityTests(unittest.TestCase):
     def test_claude_requires_api_key(self):
         self.assertFalse(ClaudeProvider(JarvisConfig(anthropic_api_key=None)).is_available())
         self.assertTrue(ClaudeProvider(JarvisConfig(anthropic_api_key="key")).is_available())
+
+    def test_chatgpt_without_api_key_returns_guidance(self):
+        response = ChatGPTProvider(JarvisConfig(openai_api_key=None)).complete(ChatRequest(prompt="테스트"))
+
+        self.assertEqual(response.provider, "chatgpt")
+        self.assertIn("비활성화", response.content)
+        self.assertEqual(response.metadata["missing_api_key"], "OPENAI_API_KEY")
+
+    def test_claude_without_api_key_returns_guidance(self):
+        response = ClaudeProvider(JarvisConfig(anthropic_api_key=None)).complete(ChatRequest(prompt="테스트"))
+
+        self.assertEqual(response.provider, "claude")
+        self.assertIn("비활성화", response.content)
+        self.assertEqual(response.metadata["missing_api_key"], "ANTHROPIC_API_KEY")
+
+    def test_windows_automation_status(self):
+        response = WindowsAutomationProvider(JarvisConfig()).complete(ChatRequest(prompt="상태 점검"))
+
+        self.assertEqual(response.provider, "windows_automation")
+        self.assertIn("Windows 자동화 Provider 상태", response.content)
 
     def test_open_interpreter_uses_command_lookup(self):
         provider = OpenInterpreterProvider(JarvisConfig(open_interpreter_command="missing-interpreter"))
