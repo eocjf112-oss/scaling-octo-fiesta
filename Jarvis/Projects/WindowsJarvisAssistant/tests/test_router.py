@@ -81,6 +81,14 @@ class JarvisRouterTests(unittest.TestCase):
 
         self.assertEqual(selected, "windows_automation")
 
+    def test_auto_routes_korean_voice_commands_to_windows_automation(self):
+        registry = ProviderRegistry([FakeProvider("local"), FakeProvider("windows_automation")])
+        router = JarvisRouter(JarvisConfig(default_provider="local"), registry)
+
+        selected = router.select_provider(ChatRequest(prompt="메모장 열어줘"))
+
+        self.assertEqual(selected, "windows_automation")
+
     def test_auto_falls_back_to_local_provider(self):
         registry = ProviderRegistry([FakeProvider("local")])
         router = JarvisRouter(JarvisConfig(default_provider="chatgpt"), registry)

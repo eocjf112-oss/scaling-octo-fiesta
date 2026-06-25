@@ -39,8 +39,8 @@ def run_windows_action(command: str, config: JarvisConfig) -> ActionResult:
         return organize_files(config)
     if _has_any(normalized, ("internet", "web", "browser", "인터넷", "웹", "구글")):
         return internet_search(_extract_query(command))
-    if _has_any(normalized, ("run ", "launch", "open program", "프로그램 실행", "실행")):
-        return launch_program(_extract_query(command))
+    if _has_any(normalized, ("run ", "launch", "open program", "프로그램 실행", "실행", "열어", "켜줘", "열어줘")):
+        return launch_program(_extract_program_name(command))
     return ActionResult(
         action="help",
         success=True,
@@ -131,7 +131,7 @@ def organize_files(config: JarvisConfig) -> ActionResult:
 
 
 def launch_program(program: str) -> ActionResult:
-    program = program.strip() or "notepad"
+    program = _normalize_program_name(program.strip() or "notepad")
     if platform.system().lower() == "windows":
         subprocess.Popen(program, shell=True)
         return ActionResult("run", True, f"프로그램 실행 요청을 보냈습니다: {program}")
@@ -161,7 +161,32 @@ def _extract_query(command: str) -> str:
         command.strip(),
         flags=re.IGNORECASE,
     )
+    cleaned = re.sub(r"(만들어줘|만들어|생성해줘|생성|열어줘|열어|켜줘|검색해줘|검색해|정리해줘|정리해)$", "", cleaned.strip())
     return cleaned.strip().strip('"')
+
+
+def _extract_program_name(command: str) -> str:
+    value = _extract_query(command)
+    value = re.sub(r"(프로그램|앱)$", "", value).strip()
+    return value
+
+
+def _normalize_program_name(program: str) -> str:
+    normalized = program.lower().strip()
+    mappings = {
+        "메모장": "notepad",
+        "노트패드": "notepad",
+        "notepad": "notepad",
+        "계산기": "calc",
+        "calc": "calc",
+        "그림판": "mspaint",
+        "paint": "mspaint",
+        "엣지": "msedge",
+        "edge": "msedge",
+        "크롬": "chrome",
+        "chrome": "chrome",
+    }
+    return mappings.get(normalized, program)
 
 
 def _safe_name(value: str, fallback: str) -> str:

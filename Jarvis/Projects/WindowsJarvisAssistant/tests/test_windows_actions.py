@@ -90,6 +90,27 @@ class WindowsActionsTests(unittest.TestCase):
             self.assertEqual(result.action, "excel")
             self.assertTrue(result.path.is_file())
 
+    def test_korean_voice_phrases_dispatch_to_local_actions(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            config = JarvisConfig(workspace_root=Path(temp_dir))
+
+            excel = run_windows_action("엑셀 만들어", config)
+            pdf = run_windows_action("PDF 만들어", config)
+            organize = run_windows_action("다운로드 정리해", config)
+            with patch("jarvis_assistant.windows_actions.platform.system", return_value="Linux"):
+                notepad = run_windows_action("메모장 열어줘", config)
+                web = run_windows_action("인터넷 검색해", config)
+
+            self.assertEqual(excel.action, "excel")
+            self.assertTrue(excel.path.is_file())
+            self.assertEqual(pdf.action, "pdf")
+            self.assertTrue(pdf.path.is_file())
+            self.assertEqual(organize.action, "organize")
+            self.assertEqual(notepad.action, "run")
+            self.assertIn("notepad", notepad.message)
+            self.assertEqual(web.action, "web")
+            self.assertIn("https://www.google.com/search", web.message)
+
 
 if __name__ == "__main__":
     unittest.main()

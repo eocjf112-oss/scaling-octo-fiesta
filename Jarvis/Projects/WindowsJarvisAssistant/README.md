@@ -78,6 +78,7 @@ python -m pip install -e ".[interpreter]"
 Windows에서는 먼저 다음 명령을 사용할 수 있습니다.
 
 ```bat
+Jarvis.bat
 Jarvis.bat test
 Jarvis.bat providers
 Jarvis.bat voice
@@ -92,6 +93,9 @@ Jarvis.bat listen
 ```bat
 Jarvis.bat "Jarvis 현재 상태를 알려줘"
 ```
+
+`Jarvis.bat`을 인자 없이 실행하거나 더블클릭하면 시스템 트레이 대기 상태로 들어갑니다.
+트레이 상태에서는 음성 리스너가 함께 실행되어 "자비스" 또는 "Jarvis" 호출어를 기다립니다.
 
 Open Interpreter 요청:
 
@@ -126,6 +130,25 @@ Jarvis.bat listen
 ```
 
 `Jarvis.bat listen`은 Windows 음성 인식으로 "자비스" 또는 "Jarvis" 호출어를 기다린 뒤, 다음 음성 명령을 Jarvis에 전달합니다.
+
+지원하는 기본 음성 명령 예시:
+
+```text
+자비스
+메모장 열어줘
+
+자비스
+엑셀 만들어
+
+자비스
+PDF 만들어
+
+자비스
+다운로드 정리해
+
+자비스
+인터넷 검색해
+```
 
 ### 3. 환경 설정
 
@@ -258,7 +281,8 @@ Memory DB는 개인 장기 기억이므로 Git에 커밋하지 않습니다.
 Jarvis.bat startup install
 ```
 
-이 명령은 Windows 시작프로그램 폴더에 `JarvisVoiceStartup.bat`을 생성합니다. 다음 부팅부터 Jarvis 음성 리스너가 자동으로 실행됩니다.
+이 명령은 Windows 시작프로그램 폴더에 `JarvisStartup.bat`을 생성합니다.
+다음 부팅부터 Jarvis가 시스템 트레이에 상주하고, 음성 리스너가 "자비스" 호출어를 기다립니다.
 
 제거:
 
@@ -279,6 +303,20 @@ Jarvis.bat listen
 1. "자비스" 또는 "Jarvis"라고 말합니다.
 2. Jarvis가 다음 명령을 기다립니다.
 3. 음성 명령이 `Jarvis.bat`으로 전달됩니다.
+
+시스템 트레이 상주 모드:
+
+```bat
+Jarvis.bat
+```
+
+트레이 아이콘 메뉴에서 다음 작업을 할 수 있습니다.
+
+- Jarvis 상태 보기
+- Memory 상태 보기
+- 음성 리스너 시작/중지
+- 시작 자동 실행 등록/제거
+- Jarvis 종료
 
 ### 엑셀, 워드, PDF 생성
 

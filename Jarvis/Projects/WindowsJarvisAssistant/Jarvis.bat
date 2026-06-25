@@ -16,6 +16,7 @@ if /I "%~1"=="test" goto test_providers
 if /I "%~1"=="providers" goto list_providers
 if /I "%~1"=="voice" goto voice_status
 if /I "%~1"=="listen" goto voice_listen
+if /I "%~1"=="tray" goto tray_start
 if /I "%~1"=="memory" goto memory_status
 if /I "%~1"=="startup" goto startup
 if /I "%~1"=="windows" goto windows_automation
@@ -28,7 +29,7 @@ if /I "%~1"=="organize" goto action_organize
 if /I "%~1"=="run" goto action_run
 if /I "%~1"=="web" goto action_web
 if /I "%~1"=="help" goto help
-if "%~1"=="" goto help
+if "%~1"=="" goto tray_start
 
 call :python_cmd
 %JARVIS_PYTHON% -m jarvis_assistant %*
@@ -57,6 +58,10 @@ exit /b %ERRORLEVEL%
 
 :voice_listen
 powershell -NoProfile -ExecutionPolicy Bypass -File "%JARVIS_DIR%scripts\windows\jarvis-voice.ps1"
+exit /b %ERRORLEVEL%
+
+:tray_start
+powershell -NoProfile -ExecutionPolicy Bypass -STA -File "%JARVIS_DIR%scripts\windows\jarvis-tray.ps1"
 exit /b %ERRORLEVEL%
 
 :memory_status
@@ -144,11 +149,14 @@ echo.
 echo   Jarvis.bat listen
 echo     "자비스" 호출어를 기다리는 음성 리스너를 실행합니다.
 echo.
+echo   Jarvis.bat tray
+echo     시스템 트레이에 Jarvis를 상주시킵니다. 인자 없이 Jarvis.bat을 실행해도 이 모드로 시작합니다.
+echo.
 echo   Jarvis.bat memory
 echo     SQLite 장기 기억 상태를 출력합니다.
 echo.
 echo   Jarvis.bat startup install
-echo     Windows 시작 시 Jarvis 음성 리스너가 자동 실행되도록 등록합니다.
+echo     Windows 시작 시 Jarvis 트레이/음성 대기 상태가 자동 실행되도록 등록합니다.
 echo.
 echo   Jarvis.bat startup remove
 echo     Windows 시작 자동 실행 등록을 제거합니다.
@@ -182,6 +190,9 @@ echo     Open Interpreter로 로컬 자동화 요청을 실행합니다.
 echo.
 echo   Jarvis.bat "요청 내용"
 echo     Jarvis 자동 라우터로 요청을 실행합니다.
+echo.
+echo   Jarvis.bat
+echo     시스템 트레이 대기 상태로 바로 진입합니다.
 echo.
 exit /b 0
 

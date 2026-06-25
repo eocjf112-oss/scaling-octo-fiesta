@@ -49,12 +49,44 @@ function Wait-Command {
     return $result.Text
 }
 
+function Invoke-JarvisVoiceCommand {
+    param([string]$Command)
+
+    $normalized = $Command.ToLowerInvariant()
+    if ($normalized -match "메모장|notepad") {
+        & $JarvisBat run notepad
+        return
+    }
+    if ($normalized -match "엑셀|excel") {
+        & $JarvisBat excel $Command
+        return
+    }
+    if ($normalized -match "워드|word") {
+        & $JarvisBat word $Command
+        return
+    }
+    if ($normalized -match "pdf|피디에프") {
+        & $JarvisBat pdf $Command
+        return
+    }
+    if ($normalized -match "다운로드.*정리|정리.*다운로드|organize") {
+        & $JarvisBat organize
+        return
+    }
+    if ($normalized -match "인터넷|검색|web|google|구글") {
+        & $JarvisBat web $Command
+        return
+    }
+
+    & $JarvisBat $Command
+}
+
 do {
     if (Wait-WakeWord) {
         $command = Wait-Command
         if ($command) {
             Write-Host "Jarvis 명령: $command"
-            & $JarvisBat $command
+            Invoke-JarvisVoiceCommand $command
         } else {
             Write-Host "음성 명령을 인식하지 못했습니다."
             Speak-Jarvis "명령을 인식하지 못했습니다."
