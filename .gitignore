@@ -1,0 +1,5 @@
+Jarvis/Memory/*.sqlite3
+Jarvis/Memory/*.sqlite3-*
+Jarvis/Memory/*.db
+Jarvis/Memory/*.db-*
+Jarvis/Documents/Generated/

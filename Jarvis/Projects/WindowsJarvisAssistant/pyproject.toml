@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "windows-jarvis-assistant"
+version = "0.1.0"
+description = "Windows Jarvis AI Assistant core router for ChatGPT, Claude, and Open Interpreter."
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [
+  { name = "Jarvis" }
+]
+dependencies = []
+
+[project.optional-dependencies]
+ai = [
+  "anthropic",
+  "openai",
+]
+interpreter = [
+  "open-interpreter",
+  "setuptools<81",
+]
+all = [
+  "anthropic",
+  "open-interpreter",
+  "openai",
+  "setuptools<81",
+]
+
+[project.scripts]
+jarvis-assistant = "jarvis_assistant.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
