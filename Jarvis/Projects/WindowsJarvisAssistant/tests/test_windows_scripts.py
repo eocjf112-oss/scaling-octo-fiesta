@@ -17,6 +17,7 @@ class WindowsScriptsTests(unittest.TestCase):
         self.assertIn('if /I "%~1"=="gui" goto gui_start', content)
         self.assertIn('if /I "%~1"=="settings" goto settings_start', content)
         self.assertIn("jarvis-gui.ps1", content)
+        self.assertIn("pip install -e .", content)
 
 
 if __name__ == "__main__":

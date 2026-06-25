@@ -79,6 +79,11 @@ exit /b %ERRORLEVEL%
 :tray_start
 call :require_powershell
 if errorlevel 1 exit /b %ERRORLEVEL%
+call :python_cmd
+if errorlevel 1 (
+    pause
+    exit /b %ERRORLEVEL%
+)
 powershell -NoProfile -ExecutionPolicy Bypass -STA -File "%JARVIS_DIR%scripts\windows\jarvis-tray.ps1"
 exit /b %ERRORLEVEL%
 
@@ -250,6 +255,15 @@ if exist ".venv\Scripts\python.exe" (
 if errorlevel 1 (
     call :print_failure "Python 실행 실패" "Python이 설치되어 있지 않거나 PATH에 없습니다." "Python 3.11 이상을 설치한 뒤 WindowsJarvisAssistant 폴더에서 python -m pip install -e . 를 실행하세요."
     exit /b 1
+)
+%JARVIS_PYTHON% -c "import jarvis_assistant" >nul 2>nul
+if errorlevel 1 (
+    echo Jarvis Python 패키지를 찾지 못했습니다. 자동 복구를 시작합니다...
+    %JARVIS_PYTHON% -m pip install -e .
+    if errorlevel 1 (
+        call :print_failure "Jarvis 패키지 자동 설치 실패" "pip 설치가 실패했거나 인터넷/권한 문제가 있습니다." "WindowsJarvisAssistant 폴더에서 python -m pip install -e . 를 직접 실행하세요."
+        exit /b 1
+    )
 )
 exit /b 0
 
