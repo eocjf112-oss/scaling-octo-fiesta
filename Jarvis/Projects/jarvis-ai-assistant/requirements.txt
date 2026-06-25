@@ -1,0 +1,29 @@
+# Jarvis AI Assistant — 의존성 패키지
+# Windows 환경: pip install -r requirements.txt
+
+# ── AI 에이전트 ──────────────────────────────
+openai>=1.30.0              # ChatGPT (GPT-4o)
+anthropic>=0.28.0           # Claude (claude-3-5-sonnet)
+open-interpreter>=0.3.0     # Open Interpreter (코드 실행)
+
+# ── CLI & 인터페이스 ─────────────────────────
+rich>=13.7.0                # 컬러 터미널 출력
+prompt_toolkit>=3.0.43      # 대화형 입력 (히스토리, 자동완성)
+click>=8.1.7                # CLI 명령어 프레임워크
+
+# ── 설정 & 환경변수 ──────────────────────────
+python-dotenv>=1.0.1        # .env 파일 로드
+pyyaml>=6.0.1               # config.yaml 파싱
+
+# ── 유틸리티 ────────────────────────────────
+requests>=2.31.0            # HTTP 요청
+tenacity>=8.2.3             # 재시도 로직 (API 호출 실패 시)
+tiktoken>=0.7.0             # 토큰 카운팅 (OpenAI)
+httpx>=0.27.0               # 비동기 HTTP (Anthropic)
+
+# ── 로깅 & 모니터링 ──────────────────────────
+loguru>=0.7.2               # 강력한 로깅 라이브러리
+
+# ── Windows 전용 ────────────────────────────
+pywin32>=306; sys_platform == "win32"   # Windows API
+colorama>=0.4.6             # Windows 터미널 색상 지원
