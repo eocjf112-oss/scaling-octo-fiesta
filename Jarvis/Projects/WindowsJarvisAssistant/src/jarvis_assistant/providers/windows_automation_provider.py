@@ -4,6 +4,7 @@ import platform
 
 from jarvis_assistant.config import JarvisConfig
 from jarvis_assistant.models import ChatRequest, ChatResponse
+from jarvis_assistant.windows_actions import run_windows_action
 
 
 class WindowsAutomationProvider:
@@ -21,6 +22,17 @@ class WindowsAutomationProvider:
             return self._status_response()
         if any(keyword in prompt for keyword in ("env", ".env", "환경", "api 키", "api key")):
             return self._env_response()
+        action_result = run_windows_action(request.prompt, self._config)
+        if action_result.action != "help":
+            return ChatResponse(
+                provider=self.name,
+                content=action_result.message,
+                metadata={
+                    "action": action_result.action,
+                    "success": action_result.success,
+                    "path": str(action_result.path) if action_result.path else None,
+                },
+            )
         return self._help_response()
 
     def _status_response(self) -> ChatResponse:
@@ -47,6 +59,13 @@ class WindowsAutomationProvider:
         lines = [
             "Windows 자동화 Provider 사용 예시",
             "- Jarvis.bat windows status",
+            "- Jarvis.bat excel \"월간 계획\"",
+            "- Jarvis.bat word \"회의록\"",
+            "- Jarvis.bat pdf \"보고서\"",
+            "- Jarvis.bat search \"계획\"",
+            "- Jarvis.bat organize",
+            "- Jarvis.bat run notepad",
+            "- Jarvis.bat web \"오늘 날씨\"",
             "- Jarvis.bat env",
             "- Jarvis.bat providers",
             "- Jarvis.bat oi \"현재 폴더를 요약해줘\"",

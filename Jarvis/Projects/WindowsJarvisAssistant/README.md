@@ -10,6 +10,10 @@ ChatGPT와 Claude는 추후 API 키를 넣으면 같은 구조에서 쉽게 활�
 - **Windows Automation**: Windows 상태 점검과 자동화 명령 라우팅 준비
 - **Open Interpreter**: Windows 로컬 파일, 명령, 자동화 작업 실행
 - **Voice I/O**: 음성 입력/출력 엔진을 연결할 수 있는 구조 준비
+- **Startup**: Windows 시작 시 Jarvis 음성 리스너 자동 실행
+- **Local Documents**: API 없이 엑셀, 워드, PDF 파일 생성
+- **File Tools**: 파일 검색 및 Downloads 폴더 정리
+- **Web Tools**: 기본 브라우저를 이용한 인터넷 검색
 - **Memory DB**: SQLite 기반 장기 기억으로 사용자 정보, 프로젝트 상태, 작업 기록 저장
 - **ChatGPT**: 추후 OpenAI API 키 입력 시 활성화
 - **Claude**: 추후 Anthropic API 키 입력 시 활성화
@@ -27,7 +31,10 @@ WindowsJarvisAssistant/
 ├── pyproject.toml
 ├── .env.example
 ├── docs/open_interpreter_integration.md
-├── scripts/windows/run-jarvis.ps1
+├── scripts/windows/
+│   ├── install-startup.ps1
+│   ├── jarvis-voice.ps1
+│   └── run-jarvis.ps1
 ├── src/jarvis_assistant/
 │   ├── cli.py
 │   ├── config.py
@@ -36,6 +43,7 @@ WindowsJarvisAssistant/
 │   ├── models.py
 │   ├── router.py
 │   ├── voice.py
+│   ├── windows_actions.py
 │   └── providers/
 │       ├── local_provider.py
 │       ├── anthropic_provider.py
@@ -75,6 +83,8 @@ Jarvis.bat providers
 Jarvis.bat voice
 Jarvis.bat memory
 Jarvis.bat windows status
+Jarvis.bat startup install
+Jarvis.bat listen
 ```
 
 일반 요청:
@@ -88,6 +98,34 @@ Open Interpreter 요청:
 ```bat
 Jarvis.bat oi "현재 폴더 구조를 요약해줘"
 ```
+
+Windows 로컬 자동화:
+
+```bat
+Jarvis.bat excel "월간 계획"
+Jarvis.bat word "회의록"
+Jarvis.bat pdf "보고서"
+Jarvis.bat search "계획"
+Jarvis.bat organize
+Jarvis.bat run notepad
+Jarvis.bat web "오늘 날씨"
+```
+
+Windows 시작 시 자동 실행:
+
+```bat
+Jarvis.bat startup install
+Jarvis.bat startup status
+Jarvis.bat startup remove
+```
+
+음성 호출:
+
+```bat
+Jarvis.bat listen
+```
+
+`Jarvis.bat listen`은 Windows 음성 인식으로 "자비스" 또는 "Jarvis" 호출어를 기다린 뒤, 다음 음성 명령을 Jarvis에 전달합니다.
 
 ### 3. 환경 설정
 
@@ -151,7 +189,15 @@ Jarvis.bat providers
 Jarvis.bat test
 Jarvis.bat voice
 Jarvis.bat memory
+Jarvis.bat startup install
 Jarvis.bat windows status
+Jarvis.bat excel "월간 계획"
+Jarvis.bat word "회의록"
+Jarvis.bat pdf "보고서"
+Jarvis.bat search "계획"
+Jarvis.bat organize
+Jarvis.bat run notepad
+Jarvis.bat web "Windows 자동화"
 Jarvis.bat oi "현재 폴더를 요약해줘"
 ```
 
@@ -203,6 +249,74 @@ python -m jarvis_assistant --memory-status
 ```
 
 Memory DB는 개인 장기 기억이므로 Git에 커밋하지 않습니다.
+
+## Windows 실사용 기능
+
+### 시작 시 자동 실행
+
+```bat
+Jarvis.bat startup install
+```
+
+이 명령은 Windows 시작프로그램 폴더에 `JarvisVoiceStartup.bat`을 생성합니다. 다음 부팅부터 Jarvis 음성 리스너가 자동으로 실행됩니다.
+
+제거:
+
+```bat
+Jarvis.bat startup remove
+```
+
+### 음성으로 "자비스" 호출
+
+```bat
+Jarvis.bat listen
+```
+
+음성 리스너는 Windows `System.Speech`를 사용합니다.
+
+흐름:
+
+1. "자비스" 또는 "Jarvis"라고 말합니다.
+2. Jarvis가 다음 명령을 기다립니다.
+3. 음성 명령이 `Jarvis.bat`으로 전달됩니다.
+
+### 엑셀, 워드, PDF 생성
+
+```bat
+Jarvis.bat excel "월간 계획"
+Jarvis.bat word "회의록"
+Jarvis.bat pdf "보고서"
+```
+
+생성 위치:
+
+```text
+Jarvis/Documents/Generated
+```
+
+### 파일 검색 및 정리
+
+```bat
+Jarvis.bat search "계획"
+Jarvis.bat organize
+```
+
+`organize`는 `Jarvis/Downloads` 폴더를 확장자 기준으로 분류합니다.
+
+### 프로그램 실행
+
+```bat
+Jarvis.bat run notepad
+Jarvis.bat run calc
+```
+
+### 인터넷 검색
+
+```bat
+Jarvis.bat web "오늘 날씨"
+```
+
+기본 브라우저로 Google 검색을 엽니다. 별도 API 키가 필요하지 않습니다.
 
 ## 보안 메모
 

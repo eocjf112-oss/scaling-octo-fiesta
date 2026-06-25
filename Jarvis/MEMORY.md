@@ -225,6 +225,26 @@ Git 브랜치: cursor/jarvis-workspace-setup-b80e
 - 작업 기록 기반 사용자 선호 자동 추출
 - Open Interpreter 실행 로그와 Memory DB 연결
 
+### 세션 008 — 2026년 6월 25일
+**목표:** Windows에서 API 없이 실제 사용할 수 있는 Jarvis 기능 구현
+
+**완료 작업:**
+- Windows 시작 시 Jarvis 음성 리스너 자동 실행 등록 스크립트 추가
+- `Jarvis.bat startup install/remove/status` 명령 추가
+- Windows `System.Speech` 기반 음성 리스너 스크립트 추가
+- "자비스" 또는 "Jarvis" 호출어 감지 후 음성 명령을 Jarvis로 전달하는 구조 구현
+- API 없이 엑셀(`.xlsx`), 워드(`.docx`), PDF(`.pdf`) 생성 기능 추가
+- 파일 검색 및 `Downloads` 폴더 정리 기능 추가
+- 프로그램 실행 기능 추가
+- 기본 브라우저 기반 인터넷 검색 기능 추가
+- `Jarvis.bat excel/word/pdf/search/organize/run/web/listen` 명령 추가
+
+**다음 세션 목표:**
+- Windows 실제 PC에서 음성 인식 정확도 점검
+- 폴더 열기, 시스템 정보 수집, 작업 스케줄러 연동 추가
+- 생성 문서 템플릿 고도화
+- Open Interpreter 실행 로그 Sanitizer 구현
+
 ---
 
 ## 📝 메모 및 아이디어 (Notes & Ideas)
