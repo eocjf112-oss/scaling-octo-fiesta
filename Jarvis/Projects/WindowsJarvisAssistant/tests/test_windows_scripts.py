@@ -32,6 +32,8 @@ class WindowsScriptsTests(unittest.TestCase):
         self.assertIn("jarvis-gui.ps1", content)
         self.assertIn("tray_fallback", content)
         self.assertIn("cli_fallback", content)
+        self.assertIn(":join_args", content)
+        self.assertIn('"%JARVIS_PROMPT%"', content)
         self.assertIn("pip install -e .", content)
 
     def test_gui_exposes_all_api_less_buttons(self):

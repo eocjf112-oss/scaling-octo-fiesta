@@ -39,7 +39,9 @@ if /I "%~1"=="help" goto help
 if "%~1"=="" goto tray_start
 
 call :python_cmd
-%JARVIS_PYTHON% -m jarvis_assistant %*
+if errorlevel 1 exit /b %ERRORLEVEL%
+call :join_args %*
+%JARVIS_PYTHON% -m jarvis_assistant "%JARVIS_PROMPT%"
 exit /b %ERRORLEVEL%
 
 :open_env
@@ -148,7 +150,8 @@ shift
 if "%~1"=="" (
     %JARVIS_PYTHON% -m jarvis_assistant --provider windows_automation "상태 점검"
 ) else (
-    %JARVIS_PYTHON% -m jarvis_assistant --provider windows_automation %*
+    call :join_args %*
+    %JARVIS_PYTHON% -m jarvis_assistant --provider windows_automation "%JARVIS_PROMPT%"
 )
 exit /b %ERRORLEVEL%
 
@@ -160,7 +163,8 @@ if "%~1"=="" (
     echo Open Interpreter에 전달할 요청을 입력하세요.
     exit /b 1
 )
-%JARVIS_PYTHON% -m jarvis_assistant --provider open_interpreter --confirm-local-execution %*
+call :join_args %*
+%JARVIS_PYTHON% -m jarvis_assistant --provider open_interpreter --confirm-local-execution "%JARVIS_PROMPT%"
 exit /b %ERRORLEVEL%
 
 :action_excel
@@ -304,9 +308,27 @@ call :python_cmd
 if errorlevel 1 exit /b %ERRORLEVEL%
 set "JARVIS_ACTION=%~1"
 shift
-%JARVIS_PYTHON% -m jarvis_assistant --provider windows_automation "%JARVIS_ACTION% %*"
+call :join_args %*
+if "%JARVIS_PROMPT%"=="" (
+    set "JARVIS_PROMPT=%JARVIS_ACTION%"
+) else (
+    set "JARVIS_PROMPT=%JARVIS_ACTION% %JARVIS_PROMPT%"
+)
+%JARVIS_PYTHON% -m jarvis_assistant --provider windows_automation "%JARVIS_PROMPT%"
 if errorlevel 1 call :print_failure "Windows 자동화 명령 실패" "명령 실행 중 오류가 발생했습니다." "Jarvis.bat selftest를 실행해 어느 단계가 실패하는지 확인하세요."
 exit /b %ERRORLEVEL%
+
+:join_args
+set "JARVIS_PROMPT="
+:join_args_loop
+if "%~1"=="" exit /b 0
+if defined JARVIS_PROMPT (
+    set "JARVIS_PROMPT=%JARVIS_PROMPT% %~1"
+) else (
+    set "JARVIS_PROMPT=%~1"
+)
+shift
+goto join_args_loop
 
 :require_powershell
 where powershell >nul 2>nul

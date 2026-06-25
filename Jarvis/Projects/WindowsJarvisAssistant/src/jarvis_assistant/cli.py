@@ -13,7 +13,7 @@ from jarvis_assistant.voice import format_voice_status, get_voice_capabilities
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Windows Jarvis AI Assistant")
-    parser.add_argument("prompt", nargs="?", help="Jarvis에 전달할 요청")
+    parser.add_argument("prompt", nargs="*", help="Jarvis에 전달할 요청")
     parser.add_argument(
         "--provider",
         default="auto",
@@ -92,14 +92,16 @@ def main(argv: list[str] | None = None) -> int:
         memory.record_work("system", "memory-status", output, "success")
         return 0
 
-    if not args.prompt:
+    prompt = " ".join(args.prompt).strip()
+
+    if not prompt:
         parser.error(
             "prompt is required unless --list-providers, --test-providers, --voice-status, "
             "or --memory-status is used."
         )
 
     request = ChatRequest(
-        prompt=args.prompt,
+        prompt=prompt,
         provider=args.provider,
         system_prompt=args.system_prompt,
         temperature=args.temperature,
@@ -113,13 +115,13 @@ def main(argv: list[str] | None = None) -> int:
         response = router.dispatch(request)
     except ProviderError as exc:
         print(f"Jarvis error: {exc}", file=sys.stderr)
-        memory.record_work(args.provider, args.prompt, "", "failure", error=str(exc))
+        memory.record_work(args.provider, prompt, "", "failure", error=str(exc))
         return 1
 
     print(response.content)
     memory.record_work(
         response.provider,
-        args.prompt,
+        prompt,
         response.content,
         "success",
         metadata={"requested_provider": args.provider},
