@@ -71,9 +71,13 @@ $menu = New-Object System.Windows.Forms.ContextMenuStrip
 $testMenu = New-Object System.Windows.Forms.ToolStripMenuItem
 $testMenu.Text = "테스트 메뉴"
 [void]$testMenu.DropDownItems.Add("메모장 열기", $null, { Start-JarvisConsole "run notepad" })
+[void]$testMenu.DropDownItems.Add("계산기 열기", $null, { Start-JarvisConsole "calc" })
 [void]$testMenu.DropDownItems.Add("PDF 생성", $null, { Start-JarvisConsole "pdf `"트레이 테스트`"" })
+[void]$testMenu.DropDownItems.Add("엑셀 생성", $null, { Start-JarvisConsole "excel `"트레이 테스트`"" })
+[void]$testMenu.DropDownItems.Add("Word 문서 생성", $null, { Start-JarvisConsole "word `"트레이 테스트`"" })
 [void]$testMenu.DropDownItems.Add("다운로드 정리", $null, { Start-JarvisConsole "organize" })
 [void]$testMenu.DropDownItems.Add("인터넷 검색", $null, { Start-JarvisConsole "web `"Jarvis 사용법`"" })
+[void]$testMenu.DropDownItems.Add("장기기억 저장 테스트", $null, { Start-JarvisConsole "`"장기 기억 트레이 테스트`"" })
 [void]$testMenu.DropDownItems.Add("장기 기억 확인", $null, { Start-JarvisConsole "memory" })
 [void]$menu.Items.Add($testMenu)
 [void]$menu.Items.Add((New-Object System.Windows.Forms.ToolStripSeparator))

@@ -83,6 +83,7 @@ Windows에서는 먼저 다음 명령을 사용할 수 있습니다.
 
 ```bat
 Jarvis.bat
+Jarvis.bat 자비스
 Jarvis.bat gui
 Jarvis.bat settings
 Jarvis.bat selftest
@@ -140,6 +141,8 @@ Jarvis.bat oi "현재 폴더 구조를 요약해줘"
 Windows 로컬 자동화:
 
 ```bat
+Jarvis.bat run notepad
+Jarvis.bat calc
 Jarvis.bat excel "월간 계획"
 Jarvis.bat word "회의록"
 Jarvis.bat pdf "보고서"
@@ -170,6 +173,9 @@ Jarvis.bat listen
 ```text
 자비스
 메모장 열어줘
+
+자비스
+계산기 열어줘
 
 자비스
 엑셀 만들어
@@ -332,15 +338,18 @@ GUI 버튼:
 
 - 전체 테스트
 - 메모장 열기
+- 계산기 열기
 - PDF 생성
 - 엑셀 생성
 - 워드 생성
 - 다운로드 정리
 - 인터넷 검색
 - 장기 기억 보기
+- 장기기억 저장 테스트
 - 음성 대기 시작
 - 시작 자동 실행 등록/제거
 - 설정 열기
+- 직접 명령 입력
 
 ### 설정창
 

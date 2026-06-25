@@ -180,7 +180,7 @@ function Show-SettingsForm {
 function Show-MainForm {
     $form = New-Object System.Windows.Forms.Form
     $form.Text = "Jarvis 제어판"
-    $form.Size = New-Object System.Drawing.Size(650, 430)
+    $form.Size = New-Object System.Drawing.Size(650, 540)
     $form.StartPosition = "CenterScreen"
 
     $title = New-Object System.Windows.Forms.Label
@@ -193,24 +193,56 @@ function Show-MainForm {
     $buttons = @(
         @("전체 테스트", 20, 70, { Invoke-JarvisCommand "selftest" }),
         @("메모장 열기", 220, 70, { Invoke-JarvisCommand "run notepad" }),
-        @("PDF 생성", 420, 70, { Invoke-JarvisCommand "pdf `"GUI 테스트`"" }),
-        @("엑셀 생성", 20, 130, { Invoke-JarvisCommand "excel `"GUI 테스트`"" }),
-        @("워드 생성", 220, 130, { Invoke-JarvisCommand "word `"GUI 테스트`"" }),
-        @("다운로드 정리", 420, 130, { Invoke-JarvisCommand "organize" }),
-        @("인터넷 검색", 20, 190, { Invoke-JarvisCommand "web `"Jarvis 사용법`"" }),
-        @("장기 기억 보기", 220, 190, { Invoke-JarvisCommand "memory" }),
-        @("음성 대기 시작", 420, 190, { Invoke-JarvisCommand "listen" }),
-        @("시작 자동 실행 등록", 20, 250, { Invoke-JarvisCommand "startup install" }),
-        @("시작 자동 실행 제거", 220, 250, { Invoke-JarvisCommand "startup remove" }),
-        @("설정 열기", 420, 250, { Show-SettingsForm })
+        @("계산기 열기", 420, 70, { Invoke-JarvisCommand "calc" }),
+        @("PDF 생성", 20, 130, { Invoke-JarvisCommand "pdf `"GUI 테스트`"" }),
+        @("엑셀 생성", 220, 130, { Invoke-JarvisCommand "excel `"GUI 테스트`"" }),
+        @("워드 생성", 420, 130, { Invoke-JarvisCommand "word `"GUI 테스트`"" }),
+        @("다운로드 정리", 20, 190, { Invoke-JarvisCommand "organize" }),
+        @("인터넷 검색", 220, 190, { Invoke-JarvisCommand "web `"Jarvis 사용법`"" }),
+        @("장기 기억 보기", 420, 190, { Invoke-JarvisCommand "memory" }),
+        @("장기기억 저장 테스트", 20, 250, { Invoke-JarvisCommand "`"장기 기억 GUI 테스트`"" }),
+        @("음성 대기 시작", 220, 250, { Invoke-JarvisCommand "listen" }),
+        @("설정 열기", 420, 250, { Show-SettingsForm }),
+        @("시작 자동 실행 등록", 20, 310, { Invoke-JarvisCommand "startup install" }),
+        @("시작 자동 실행 제거", 220, 310, { Invoke-JarvisCommand "startup remove" })
     )
     foreach ($entry in $buttons) {
         $form.Controls.Add((New-Button $entry[0] $entry[1] $entry[2] $entry[3]))
     }
 
+    $commandLabel = New-Object System.Windows.Forms.Label
+    $commandLabel.Text = "직접 명령 입력:"
+    $commandLabel.Location = New-Object System.Drawing.Point(20, 375)
+    $commandLabel.Size = New-Object System.Drawing.Size(120, 24)
+    $form.Controls.Add($commandLabel)
+
+    $commandBox = New-Object System.Windows.Forms.TextBox
+    $commandBox.Location = New-Object System.Drawing.Point(135, 372)
+    $commandBox.Size = New-Object System.Drawing.Size(340, 24)
+    $commandBox.Text = "자비스"
+    $form.Controls.Add($commandBox)
+
+    $runCommand = New-Object System.Windows.Forms.Button
+    $runCommand.Text = "실행"
+    $runCommand.Location = New-Object System.Drawing.Point(490, 368)
+    $runCommand.Size = New-Object System.Drawing.Size(110, 32)
+    $runCommand.Add_Click({
+        $command = $commandBox.Text.Trim()
+        if (-not $command) {
+            [System.Windows.Forms.MessageBox]::Show("실행할 명령을 입력하세요.", "Jarvis", "OK", "Warning") | Out-Null
+            return
+        }
+        if ($command -eq "자비스" -or $command.ToLowerInvariant() -eq "jarvis") {
+            [System.Windows.Forms.MessageBox]::Show("자비스가 준비되었습니다. 아래 버튼을 누르거나 명령을 입력하세요.", "Jarvis", "OK", "Information") | Out-Null
+            return
+        }
+        Invoke-JarvisCommand "`"$command`""
+    })
+    $form.Controls.Add($runCommand)
+
     $close = New-Object System.Windows.Forms.Button
     $close.Text = "닫기"
-    $close.Location = New-Object System.Drawing.Point(480, 330)
+    $close.Location = New-Object System.Drawing.Point(480, 440)
     $close.Size = New-Object System.Drawing.Size(120, 36)
     $close.Add_Click({ $form.Close() })
     $form.Controls.Add($close)

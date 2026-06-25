@@ -111,6 +111,7 @@ class WindowsActionsTests(unittest.TestCase):
             organize = run_windows_action("다운로드 정리해", config)
             with patch("jarvis_assistant.windows_actions.platform.system", return_value="Linux"):
                 notepad = run_windows_action("메모장 열어줘", config)
+                calculator = run_windows_action("계산기 열어줘", config)
                 web = run_windows_action("인터넷 검색해", config)
 
             self.assertEqual(excel.action, "excel")
@@ -120,6 +121,8 @@ class WindowsActionsTests(unittest.TestCase):
             self.assertEqual(organize.action, "organize")
             self.assertEqual(notepad.action, "run")
             self.assertIn("notepad", notepad.message)
+            self.assertEqual(calculator.action, "run")
+            self.assertIn("calc", calculator.message)
             self.assertEqual(web.action, "web")
             self.assertIn("https://www.google.com/search", web.message)
 

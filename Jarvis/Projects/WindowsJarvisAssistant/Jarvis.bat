@@ -19,6 +19,8 @@ if /I "%~1"=="voice" goto voice_status
 if /I "%~1"=="listen" goto voice_listen
 if /I "%~1"=="tray" goto tray_start
 if /I "%~1"=="gui" goto gui_start
+if /I "%~1"=="jarvis" goto gui_start
+if "%~1"=="자비스" goto gui_start
 if /I "%~1"=="settings" goto settings_start
 if /I "%~1"=="memory" goto memory_status
 if /I "%~1"=="startup" goto startup
@@ -29,6 +31,8 @@ if /I "%~1"=="word" goto action_word
 if /I "%~1"=="pdf" goto action_pdf
 if /I "%~1"=="search" goto action_search
 if /I "%~1"=="organize" goto action_organize
+if /I "%~1"=="calc" goto action_calc
+if /I "%~1"=="calculator" goto action_calc
 if /I "%~1"=="run" goto action_run
 if /I "%~1"=="web" goto action_web
 if /I "%~1"=="help" goto help
@@ -161,6 +165,10 @@ exit /b %ERRORLEVEL%
 call :run_windows_action organize %*
 exit /b %ERRORLEVEL%
 
+:action_calc
+call :run_windows_action calc %*
+exit /b %ERRORLEVEL%
+
 :action_run
 call :run_windows_action run %*
 exit /b %ERRORLEVEL%
@@ -198,6 +206,9 @@ echo.
 echo   Jarvis.bat gui
 echo     클릭형 Jarvis 제어판을 엽니다.
 echo.
+echo   Jarvis.bat 자비스
+echo     클릭형 Jarvis 제어판을 엽니다.
+echo.
 echo   Jarvis.bat settings
 echo     Memory DB, 다운로드 폴더, 프로젝트 폴더 설정창을 엽니다.
 echo.
@@ -227,6 +238,9 @@ echo     Jarvis 워크스페이스에서 파일을 검색합니다.
 echo.
 echo   Jarvis.bat organize
 echo     Downloads 폴더 파일을 확장자 기준으로 정리합니다.
+echo.
+echo   Jarvis.bat calc
+echo     계산기를 실행합니다.
 echo.
 echo   Jarvis.bat run notepad
 echo     프로그램을 실행합니다.

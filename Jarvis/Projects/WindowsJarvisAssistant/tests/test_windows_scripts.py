@@ -16,8 +16,28 @@ class WindowsScriptsTests(unittest.TestCase):
 
         self.assertIn('if /I "%~1"=="gui" goto gui_start', content)
         self.assertIn('if /I "%~1"=="settings" goto settings_start', content)
+        self.assertIn('if "%~1"=="자비스" goto gui_start', content)
+        self.assertIn('if /I "%~1"=="calc" goto action_calc', content)
         self.assertIn("jarvis-gui.ps1", content)
         self.assertIn("pip install -e .", content)
+
+    def test_gui_exposes_all_api_less_buttons(self):
+        root = Path(__file__).resolve().parents[1]
+        content = (root / "scripts" / "windows" / "jarvis-gui.ps1").read_text(encoding="utf-8")
+
+        for label in (
+            "메모장 열기",
+            "계산기 열기",
+            "PDF 생성",
+            "엑셀 생성",
+            "워드 생성",
+            "다운로드 정리",
+            "인터넷 검색",
+            "장기 기억 보기",
+            "장기기억 저장 테스트",
+            "직접 명령 입력",
+        ):
+            self.assertIn(label, content)
 
 
 if __name__ == "__main__":

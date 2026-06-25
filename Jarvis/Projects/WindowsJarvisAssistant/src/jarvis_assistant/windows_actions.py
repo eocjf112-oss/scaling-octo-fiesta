@@ -39,6 +39,8 @@ def run_windows_action(command: str, config: JarvisConfig) -> ActionResult:
         return search_files(config, _extract_query(command))
     if _has_any(normalized, ("organize", "정리", "분류")):
         return organize_files(config)
+    if _has_any(normalized, ("calculator", "calc", "계산기")):
+        return launch_program("calc")
     if _has_any(normalized, ("run ", "launch", "open program", "프로그램 실행", "실행", "열어", "켜줘", "열어줘")):
         return launch_program(_extract_program_name(command))
     return ActionResult(
@@ -52,6 +54,7 @@ def run_windows_action(command: str, config: JarvisConfig) -> ActionResult:
                 "- PDF 생성: Jarvis.bat pdf \"보고서\"",
                 "- 파일 검색: Jarvis.bat search \"계획\"",
                 "- 파일 정리: Jarvis.bat organize",
+                "- 계산기 실행: Jarvis.bat calc",
                 "- 프로그램 실행: Jarvis.bat run notepad",
                 "- 인터넷 검색: Jarvis.bat web \"Windows 자동화\"",
             ]
