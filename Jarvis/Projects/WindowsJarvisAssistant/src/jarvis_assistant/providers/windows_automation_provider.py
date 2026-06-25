@@ -22,7 +22,25 @@ class WindowsAutomationProvider:
             return self._status_response()
         if any(keyword in prompt for keyword in ("env", ".env", "환경", "api 키", "api key")):
             return self._env_response()
-        action_result = run_windows_action(request.prompt, self._config)
+        try:
+            action_result = run_windows_action(request.prompt, self._config)
+        except Exception as exc:
+            return ChatResponse(
+                provider=self.name,
+                content="\n".join(
+                    [
+                        "Windows 자동화 실행에 실패했습니다.",
+                        f"- 원인: {type(exc).__name__}: {exc}",
+                        "- 해결 방법:",
+                        "  1. `Jarvis.bat test`로 기본 상태를 확인하세요.",
+                        "  2. `python --version`으로 Python이 설치되어 있는지 확인하세요.",
+                        "  3. `Jarvis.bat memory`로 Memory DB 접근 권한을 확인하세요.",
+                        "  4. 파일 생성 실패라면 `Jarvis/Documents/Generated` 폴더 쓰기 권한을 확인하세요.",
+                        "  5. 프로그램 실행 실패라면 프로그램 이름이 Windows PATH에 있는지 확인하세요.",
+                    ]
+                ),
+                metadata={"action": "error", "success": False, "error": str(exc)},
+            )
         if action_result.action != "help":
             return ChatResponse(
                 provider=self.name,

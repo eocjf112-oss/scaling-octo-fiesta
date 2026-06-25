@@ -262,6 +262,22 @@ Git 브랜치: cursor/jarvis-workspace-setup-b80e
 - 음성 명령 확장: 폴더 열기, 화면 캡처, 시스템 정보 읽기
 - 장기 기억 기반 명령 추천 기능 추가
 
+### 세션 010 — 2026년 6월 25일
+**목표:** Windows 실제 실행 테스트 단계 준비
+
+**완료 작업:**
+- Windows 사용자가 직접 따라 할 수 있는 실행 테스트 가이드 작성
+- `docs/windows_execution_test_guide.md` 추가
+- `Jarvis.bat selftest` 명령 추가
+- `test-jarvis.ps1`로 메모장 열기, PDF 생성, 다운로드 정리, 인터넷 검색, 장기 기억 저장/불러오기 테스트 자동화
+- 실패 시 원인 후보와 해결 방법을 한국어로 출력하도록 `Jarvis.bat`과 Windows 자동화 Provider 개선
+- Python/PowerShell 미설치 또는 경로 문제에 대한 진단 메시지 추가
+
+**다음 세션 목표:**
+- 실제 Windows PC에서 `Jarvis.bat selftest` 실행 결과 확인
+- 실패 로그 기반 추가 보정
+- 시스템 트레이 아이콘 커스텀 및 설치 마법사 추가
+
 ---
 
 ## 📝 메모 및 아이디어 (Notes & Ideas)

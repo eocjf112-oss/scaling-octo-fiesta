@@ -31,9 +31,11 @@ WindowsJarvisAssistant/
 ├── pyproject.toml
 ├── .env.example
 ├── docs/open_interpreter_integration.md
+├── docs/windows_execution_test_guide.md
 ├── scripts/windows/
 │   ├── install-startup.ps1
 │   ├── jarvis-voice.ps1
+│   ├── test-jarvis.ps1
 │   └── run-jarvis.ps1
 ├── src/jarvis_assistant/
 │   ├── cli.py
@@ -79,6 +81,7 @@ Windows에서는 먼저 다음 명령을 사용할 수 있습니다.
 
 ```bat
 Jarvis.bat
+Jarvis.bat selftest
 Jarvis.bat test
 Jarvis.bat providers
 Jarvis.bat voice
@@ -96,6 +99,14 @@ Jarvis.bat "Jarvis 현재 상태를 알려줘"
 
 `Jarvis.bat`을 인자 없이 실행하거나 더블클릭하면 시스템 트레이 대기 상태로 들어갑니다.
 트레이 상태에서는 음성 리스너가 함께 실행되어 "자비스" 또는 "Jarvis" 호출어를 기다립니다.
+
+Windows 실제 실행 테스트는 다음 명령으로 한 번에 확인할 수 있습니다.
+
+```bat
+Jarvis.bat selftest
+```
+
+자세한 단계별 안내는 `docs/windows_execution_test_guide.md`를 참고하세요.
 
 Open Interpreter 요청:
 
@@ -210,6 +221,7 @@ Windows Batch 래퍼:
 Jarvis.bat "오늘 할 일을 정리해줘"
 Jarvis.bat providers
 Jarvis.bat test
+Jarvis.bat selftest
 Jarvis.bat voice
 Jarvis.bat memory
 Jarvis.bat startup install
@@ -241,6 +253,14 @@ Open Interpreter의 자세한 안전 정책은 `docs/open_interpreter_integratio
 ```powershell
 python -m unittest discover -s tests
 ```
+
+Windows 실제 실행 테스트:
+
+```bat
+Jarvis.bat selftest
+```
+
+`selftest`는 메모장 열기, PDF 생성, 다운로드 정리, 인터넷 검색, 장기 기억 저장/불러오기를 순서대로 확인하고 실패 시 원인 후보와 해결 방법을 출력합니다.
 
 ## 장기 기억 시스템
 

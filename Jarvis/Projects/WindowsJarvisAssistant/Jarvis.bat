@@ -13,6 +13,7 @@ if not exist ".env" (
 
 if /I "%~1"=="env" goto open_env
 if /I "%~1"=="test" goto test_providers
+if /I "%~1"=="selftest" goto self_test
 if /I "%~1"=="providers" goto list_providers
 if /I "%~1"=="voice" goto voice_status
 if /I "%~1"=="listen" goto voice_listen
@@ -42,34 +43,52 @@ exit /b 0
 
 :test_providers
 call :python_cmd
+if errorlevel 1 exit /b %ERRORLEVEL%
 echo Jarvis 로컬/자동화 Provider 상태를 테스트합니다.
 %JARVIS_PYTHON% -m jarvis_assistant --test-providers
+if errorlevel 1 call :print_failure "Provider 상태 테스트 실패" "Python 패키지 설치 또는 Memory DB 초기화 문제" "python -m pip install -e . 를 실행한 뒤 다시 시도하세요."
+exit /b %ERRORLEVEL%
+
+:self_test
+call :require_powershell
+if errorlevel 1 exit /b %ERRORLEVEL%
+powershell -NoProfile -ExecutionPolicy Bypass -File "%JARVIS_DIR%scripts\windows\test-jarvis.ps1"
+if errorlevel 1 call :print_failure "Windows 실행 테스트 실패" "위 단계 중 하나가 실패했습니다." "출력된 단계별 원인과 해결 방법을 확인하세요."
 exit /b %ERRORLEVEL%
 
 :list_providers
 call :python_cmd
+if errorlevel 1 exit /b %ERRORLEVEL%
 %JARVIS_PYTHON% -m jarvis_assistant --list-providers
 exit /b %ERRORLEVEL%
 
 :voice_status
 call :python_cmd
+if errorlevel 1 exit /b %ERRORLEVEL%
 %JARVIS_PYTHON% -m jarvis_assistant --voice-status
 exit /b %ERRORLEVEL%
 
 :voice_listen
+call :require_powershell
+if errorlevel 1 exit /b %ERRORLEVEL%
 powershell -NoProfile -ExecutionPolicy Bypass -File "%JARVIS_DIR%scripts\windows\jarvis-voice.ps1"
 exit /b %ERRORLEVEL%
 
 :tray_start
+call :require_powershell
+if errorlevel 1 exit /b %ERRORLEVEL%
 powershell -NoProfile -ExecutionPolicy Bypass -STA -File "%JARVIS_DIR%scripts\windows\jarvis-tray.ps1"
 exit /b %ERRORLEVEL%
 
 :memory_status
 call :python_cmd
+if errorlevel 1 exit /b %ERRORLEVEL%
 %JARVIS_PYTHON% -m jarvis_assistant --memory-status
 exit /b %ERRORLEVEL%
 
 :startup
+call :require_powershell
+if errorlevel 1 exit /b %ERRORLEVEL%
 if /I "%~2"=="install" (
     powershell -NoProfile -ExecutionPolicy Bypass -File "%JARVIS_DIR%scripts\windows\install-startup.ps1" -Action install
     exit /b %ERRORLEVEL%
@@ -83,6 +102,7 @@ exit /b %ERRORLEVEL%
 
 :windows_automation
 call :python_cmd
+if errorlevel 1 exit /b %ERRORLEVEL%
 shift
 if "%~1"=="" (
     %JARVIS_PYTHON% -m jarvis_assistant --provider windows_automation "상태 점검"
@@ -93,6 +113,7 @@ exit /b %ERRORLEVEL%
 
 :open_interpreter
 call :python_cmd
+if errorlevel 1 exit /b %ERRORLEVEL%
 shift
 if "%~1"=="" (
     echo Open Interpreter에 전달할 요청을 입력하세요.
@@ -139,6 +160,9 @@ echo     .env 파일을 메모장으로 엽니다. API 키는 선택 사항입�
 echo.
 echo   Jarvis.bat test
 echo     로컬, Windows 자동화, Open Interpreter, 선택 API Provider 상태를 테스트합니다.
+echo.
+echo   Jarvis.bat selftest
+echo     메모장, PDF 생성, 다운로드 정리, 인터넷 검색, 장기 기억을 단계별로 테스트합니다.
 echo.
 echo   Jarvis.bat providers
 echo     현재 사용 가능한 Provider 목록을 출력합니다.
@@ -202,11 +226,35 @@ if exist ".venv\Scripts\python.exe" (
 ) else (
     set "JARVIS_PYTHON=python"
 )
+%JARVIS_PYTHON% --version >nul 2>nul
+if errorlevel 1 (
+    call :print_failure "Python 실행 실패" "Python이 설치되어 있지 않거나 PATH에 없습니다." "Python 3.11 이상을 설치한 뒤 WindowsJarvisAssistant 폴더에서 python -m pip install -e . 를 실행하세요."
+    exit /b 1
+)
 exit /b 0
 
 :run_windows_action
 call :python_cmd
+if errorlevel 1 exit /b %ERRORLEVEL%
 set "JARVIS_ACTION=%~1"
 shift
 %JARVIS_PYTHON% -m jarvis_assistant --provider windows_automation "%JARVIS_ACTION% %*"
+if errorlevel 1 call :print_failure "Windows 자동화 명령 실패" "명령 실행 중 오류가 발생했습니다." "Jarvis.bat selftest를 실행해 어느 단계가 실패하는지 확인하세요."
 exit /b %ERRORLEVEL%
+
+:require_powershell
+where powershell >nul 2>nul
+if errorlevel 1 (
+    call :print_failure "PowerShell 실행 실패" "PowerShell을 찾을 수 없습니다." "Windows PowerShell을 활성화하거나 PowerShell 5 이상을 설치하세요."
+    exit /b 1
+)
+exit /b 0
+
+:print_failure
+echo.
+echo [Jarvis 오류]
+echo - 실패 단계: %~1
+echo - 원인 후보: %~2
+echo - 해결 방법: %~3
+echo.
+exit /b 1
