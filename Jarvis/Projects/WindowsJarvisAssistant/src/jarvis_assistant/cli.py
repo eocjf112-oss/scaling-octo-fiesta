@@ -5,6 +5,7 @@ import sys
 
 from jarvis_assistant.config import JarvisConfig
 from jarvis_assistant.diagnostics import format_provider_checks, run_provider_checks
+from jarvis_assistant.memory import MemoryStore, format_memory_status
 from jarvis_assistant.models import ChatRequest, ProviderError
 from jarvis_assistant.router import JarvisRouter
 from jarvis_assistant.voice import format_voice_status, get_voice_capabilities
@@ -42,6 +43,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="Jarvis 음성 입출력 준비 상태를 점검",
     )
     parser.add_argument(
+        "--memory-status",
+        action="store_true",
+        help="Jarvis SQLite 장기 기억 상태를 출력",
+    )
+    parser.add_argument(
         "--test-prompt",
         default="Jarvis 연결 테스트입니다. 한국어로 연결 성공이라고 짧게 답하세요.",
         help="--test-providers에서 ChatGPT/Claude에 보낼 테스트 프롬프트",
@@ -54,25 +60,42 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     config = JarvisConfig.from_env()
+    memory = MemoryStore.from_config(config)
+    memory.initialize()
+    memory.bootstrap_defaults(config)
+    memory_context = memory.load_context()
     router = JarvisRouter(config)
 
     if args.list_providers:
         providers = router.available_providers()
-        print("\n".join(providers) if providers else "No providers available.")
+        output = "\n".join(providers) if providers else "No providers available."
+        print(output)
+        memory.record_work("system", "list-providers", output, "success")
         return 0
 
     if args.test_providers:
         checks = run_provider_checks(config, args.test_prompt)
-        print(format_provider_checks(checks))
+        output = format_provider_checks(checks)
+        print(output)
+        memory.record_work("system", "test-providers", output, "success")
         return 0
 
     if args.voice_status:
-        print(format_voice_status(get_voice_capabilities()))
+        output = format_voice_status(get_voice_capabilities())
+        print(output)
+        memory.record_work("system", "voice-status", output, "success")
+        return 0
+
+    if args.memory_status:
+        output = format_memory_status(memory)
+        print(output)
+        memory.record_work("system", "memory-status", output, "success")
         return 0
 
     if not args.prompt:
         parser.error(
-            "prompt is required unless --list-providers, --test-providers, or --voice-status is used."
+            "prompt is required unless --list-providers, --test-providers, --voice-status, "
+            "or --memory-status is used."
         )
 
     request = ChatRequest(
@@ -80,14 +103,30 @@ def main(argv: list[str] | None = None) -> int:
         provider=args.provider,
         system_prompt=args.system_prompt,
         temperature=args.temperature,
-        metadata={"confirm_local_execution": args.confirm_local_execution},
+        metadata={
+            "confirm_local_execution": args.confirm_local_execution,
+            "memory_context": memory_context,
+        },
     )
 
     try:
         response = router.dispatch(request)
     except ProviderError as exc:
         print(f"Jarvis error: {exc}", file=sys.stderr)
+        memory.record_work(args.provider, args.prompt, "", "failure", error=str(exc))
         return 1
 
     print(response.content)
+    memory.record_work(
+        response.provider,
+        args.prompt,
+        response.content,
+        "success",
+        metadata={"requested_provider": args.provider},
+    )
+    memory.record_project_progress(
+        "Windows Jarvis AI Assistant",
+        "진행 중",
+        f"최근 실행 Provider: {response.provider}",
+    )
     return 0

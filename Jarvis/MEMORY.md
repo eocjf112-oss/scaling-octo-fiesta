@@ -207,6 +207,24 @@ Git 브랜치: cursor/jarvis-workspace-setup-b80e
 - 오프라인 음성 입출력 엔진 후보 연결
 - CLI 대화형 모드 추가
 
+### 세션 007 — 2026년 6월 25일
+**목표:** SQLite 기반 장기 기억 시스템 구현
+
+**완료 작업:**
+- `Jarvis/Memory/jarvis_memory.sqlite3`를 기본 DB로 사용하는 SQLite MemoryStore 구현
+- Jarvis 실행 시 Memory DB 자동 초기화 및 자동 로드
+- 사용자 정보 자동 저장: 언어 선호, 커뮤니케이션 스타일, 워크스페이스 경로, OS 정보
+- 프로젝트 진행 상황 자동 저장: Windows Jarvis AI Assistant 상태와 최근 실행 Provider
+- 작업 기록 자동 저장: 명령, Provider, 응답 미리보기, 성공/실패 상태
+- `Jarvis.bat memory` 및 `python -m jarvis_assistant --memory-status` 명령 추가
+- Memory DB 파일을 Git에서 제외하도록 루트 `.gitignore` 추가
+
+**다음 세션 목표:**
+- Memory 검색 및 요약 기능 추가
+- 민감 정보 Sanitizer 추가
+- 작업 기록 기반 사용자 선호 자동 추출
+- Open Interpreter 실행 로그와 Memory DB 연결
+
 ---
 
 ## 📝 메모 및 아이디어 (Notes & Ideas)

@@ -22,6 +22,7 @@ class JarvisConfigTests(unittest.TestCase):
         )
         self.assertEqual(config.openai_model, "gpt-4o-mini")
         self.assertEqual(config.anthropic_model, "claude-3-5-sonnet-latest")
+        self.assertEqual(config.memory_db_path, config.workspace_root / "Memory" / "jarvis_memory.sqlite3")
         self.assertEqual(config.open_interpreter_timeout_seconds, 120)
         self.assertFalse(config.open_interpreter_auto_yes)
         self.assertTrue(config.open_interpreter_require_confirmation)
@@ -31,6 +32,7 @@ class JarvisConfigTests(unittest.TestCase):
             "JARVIS_DEFAULT_PROVIDER": "claude",
             "JARVIS_PROVIDER_PRIORITY": "claude,chatgpt,open_interpreter",
             "JARVIS_WORKSPACE_ROOT": str(Path("/tmp/jarvis-root")),
+            "JARVIS_MEMORY_DB_PATH": str(Path("/tmp/jarvis-root/Memory/test.sqlite3")),
             "OPENAI_API_KEY": "openai-key",
             "JARVIS_OPENAI_MODEL": "gpt-test",
             "ANTHROPIC_API_KEY": "anthropic-key",
@@ -48,6 +50,7 @@ class JarvisConfigTests(unittest.TestCase):
         self.assertEqual(config.default_provider, "claude")
         self.assertEqual(config.provider_priority, ("claude", "chatgpt", "open_interpreter"))
         self.assertEqual(config.workspace_root, Path("/tmp/jarvis-root"))
+        self.assertEqual(config.memory_db_path, Path("/tmp/jarvis-root/Memory/test.sqlite3"))
         self.assertEqual(config.openai_api_key, "openai-key")
         self.assertEqual(config.openai_model, "gpt-test")
         self.assertEqual(config.anthropic_api_key, "anthropic-key")

@@ -15,6 +15,7 @@ if /I "%~1"=="env" goto open_env
 if /I "%~1"=="test" goto test_providers
 if /I "%~1"=="providers" goto list_providers
 if /I "%~1"=="voice" goto voice_status
+if /I "%~1"=="memory" goto memory_status
 if /I "%~1"=="windows" goto windows_automation
 if /I "%~1"=="oi" goto open_interpreter
 if /I "%~1"=="help" goto help
@@ -43,6 +44,11 @@ exit /b %ERRORLEVEL%
 :voice_status
 call :python_cmd
 %JARVIS_PYTHON% -m jarvis_assistant --voice-status
+exit /b %ERRORLEVEL%
+
+:memory_status
+call :python_cmd
+%JARVIS_PYTHON% -m jarvis_assistant --memory-status
 exit /b %ERRORLEVEL%
 
 :windows_automation
@@ -81,6 +87,9 @@ echo     현재 사용 가능한 Provider 목록을 출력합니다.
 echo.
 echo   Jarvis.bat voice
 echo     음성 입출력 준비 상태를 출력합니다.
+echo.
+echo   Jarvis.bat memory
+echo     SQLite 장기 기억 상태를 출력합니다.
 echo.
 echo   Jarvis.bat windows status
 echo     Windows 자동화 Provider 상태를 출력합니다.
