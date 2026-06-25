@@ -3,6 +3,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+
 $ProjectRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
 $WorkspaceRoot = Resolve-Path (Join-Path $ProjectRoot "..\..")
 $JarvisBat = Join-Path $ProjectRoot "Jarvis.bat"
@@ -14,56 +15,84 @@ Add-Type -AssemblyName System.Drawing
 [System.Windows.Forms.Application]::EnableVisualStyles()
 
 function Ensure-EnvFile {
-    if (-not (Test-Path $EnvFile) -and (Test-Path $EnvExample)) {
-        Copy-Item $EnvExample $EnvFile
+    if ((-not (Test-Path -Path $EnvFile)) -and (Test-Path -Path $EnvExample)) {
+        Copy-Item -Path $EnvExample -Destination $EnvFile -Force
     }
 }
 
 function Read-EnvMap {
     Ensure-EnvFile
     $map = @{}
-    if (Test-Path $EnvFile) {
-        foreach ($line in Get-Content $EnvFile -Encoding UTF8) {
-            if ($line.Trim().StartsWith("#") -or -not $line.Contains("=")) {
-                continue
+
+    if (Test-Path -Path $EnvFile) {
+        $lines = [System.IO.File]::ReadAllLines($EnvFile)
+        foreach ($line in $lines) {
+            $trimmed = $line.Trim()
+            if ($trimmed.Length -eq 0) { continue }
+            if ($trimmed.StartsWith("#")) { continue }
+            if (-not $line.Contains("=")) { continue }
+
+            $parts = $line.Split(@("="), 2, [System.StringSplitOptions]::None)
+            $key = $parts[0].Trim()
+            $value = ""
+            if ($parts.Length -gt 1) {
+                $value = $parts[1].Trim()
             }
-            $parts = $line.Split("=", 2)
-            $map[$parts[0].Trim()] = $parts[1].Trim()
+            if ($key.Length -gt 0) {
+                $map[$key] = $value
+            }
         }
     }
+
     return $map
 }
 
 function Write-EnvMap {
-    param([hashtable]$Updates)
+    param(
+        [hashtable]$Updates
+    )
+
     Ensure-EnvFile
     $known = @{}
-    $lines = New-Object System.Collections.Generic.List[string]
-    foreach ($line in Get-Content $EnvFile -Encoding UTF8) {
-        if ($line.Trim().StartsWith("#") -or -not $line.Contains("=")) {
-            $lines.Add($line)
-            continue
-        }
-        $parts = $line.Split("=", 2)
-        $key = $parts[0].Trim()
-        if ($Updates.ContainsKey($key)) {
-            $lines.Add("$key=$($Updates[$key])")
-            $known[$key] = $true
-        } else {
-            $lines.Add($line)
+    $output = New-Object System.Collections.Generic.List[string]
+
+    if (Test-Path -Path $EnvFile) {
+        $lines = [System.IO.File]::ReadAllLines($EnvFile)
+        foreach ($line in $lines) {
+            $trimmed = $line.Trim()
+            if ($trimmed.StartsWith("#") -or (-not $line.Contains("="))) {
+                $output.Add($line)
+                continue
+            }
+
+            $parts = $line.Split(@("="), 2, [System.StringSplitOptions]::None)
+            $key = $parts[0].Trim()
+            if ($Updates.ContainsKey($key)) {
+                $output.Add(("{0}={1}" -f $key, $Updates[$key]))
+                $known[$key] = $true
+            } else {
+                $output.Add($line)
+            }
         }
     }
+
     foreach ($key in $Updates.Keys) {
         if (-not $known.ContainsKey($key)) {
-            $lines.Add("$key=$($Updates[$key])")
+            $output.Add(("{0}={1}" -f $key, $Updates[$key]))
         }
     }
-    Set-Content -Path $EnvFile -Value $lines -Encoding UTF8
+
+    $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+    [System.IO.File]::WriteAllLines($EnvFile, $output.ToArray(), $utf8NoBom)
 }
 
 function Invoke-JarvisCommand {
-    param([string]$Arguments)
-    Start-Process -FilePath "cmd.exe" -ArgumentList "/c `"`"$JarvisBat`" $Arguments & pause`""
+    param(
+        [string]$Arguments
+    )
+
+    $cmd = "`"$JarvisBat`" $Arguments"
+    Start-Process -FilePath "cmd.exe" -ArgumentList "/c $cmd & pause"
 }
 
 function New-Button {
@@ -73,6 +102,7 @@ function New-Button {
         [int]$Y,
         [scriptblock]$Action
     )
+
     $button = New-Object System.Windows.Forms.Button
     $button.Text = $Text
     $button.Location = New-Object System.Drawing.Point($X, $Y)
@@ -81,26 +111,54 @@ function New-Button {
     return $button
 }
 
+function Add-Button {
+    param(
+        [System.Windows.Forms.Form]$Form,
+        [string]$Text,
+        [int]$X,
+        [int]$Y,
+        [scriptblock]$Action
+    )
+
+    $button = New-Button -Text $Text -X $X -Y $Y -Action $Action
+    [void]$Form.Controls.Add($button)
+}
+
 function Select-Folder {
-    param([System.Windows.Forms.TextBox]$Target)
+    param(
+        [System.Windows.Forms.TextBox]$Target
+    )
+
     $dialog = New-Object System.Windows.Forms.FolderBrowserDialog
-    if ($Target.Text) {
+    if ($Target.Text -and (Test-Path -Path $Target.Text)) {
         $dialog.SelectedPath = $Target.Text
     }
+
     if ($dialog.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
         $Target.Text = $dialog.SelectedPath
     }
 }
 
 function Select-MemoryDb {
-    param([System.Windows.Forms.TextBox]$Target)
+    param(
+        [System.Windows.Forms.TextBox]$Target
+    )
+
     $dialog = New-Object System.Windows.Forms.SaveFileDialog
     $dialog.Filter = "SQLite DB (*.sqlite3)|*.sqlite3|All files (*.*)|*.*"
     $dialog.FileName = "jarvis_memory.sqlite3"
+
     if ($Target.Text) {
-        $dialog.InitialDirectory = Split-Path $Target.Text -Parent
-        $dialog.FileName = Split-Path $Target.Text -Leaf
+        $parent = Split-Path -Path $Target.Text -Parent
+        $leaf = Split-Path -Path $Target.Text -Leaf
+        if ($parent -and (Test-Path -Path $parent)) {
+            $dialog.InitialDirectory = $parent
+        }
+        if ($leaf) {
+            $dialog.FileName = $leaf
+        }
     }
+
     if ($dialog.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
         $Target.Text = $dialog.FileName
     }
@@ -108,144 +166,172 @@ function Select-MemoryDb {
 
 function Show-SettingsForm {
     $envMap = Read-EnvMap
+
     $form = New-Object System.Windows.Forms.Form
-    $form.Text = "Jarvis 설정"
+    $form.Text = "Jarvis Settings"
     $form.Size = New-Object System.Drawing.Size(720, 330)
     $form.StartPosition = "CenterScreen"
+    $form.FormBorderStyle = "FixedDialog"
+    $form.MaximizeBox = $false
 
-    $labels = @(
-        @("Memory DB", "JARVIS_MEMORY_DB_PATH", 20, 30),
-        @("다운로드 폴더", "JARVIS_DOWNLOADS_DIR", 20, 90),
-        @("프로젝트 폴더", "JARVIS_PROJECTS_DIR", 20, 150)
-    )
-    $textBoxes = @{}
-    foreach ($item in $labels) {
-        $label = New-Object System.Windows.Forms.Label
-        $label.Text = $item[0]
-        $label.Location = New-Object System.Drawing.Point($item[2], $item[3])
-        $label.Size = New-Object System.Drawing.Size(110, 24)
-        $form.Controls.Add($label)
+    $memoryLabel = New-Object System.Windows.Forms.Label
+    $memoryLabel.Text = "Memory DB"
+    $memoryLabel.Location = New-Object System.Drawing.Point(20, 30)
+    $memoryLabel.Size = New-Object System.Drawing.Size(110, 24)
+    [void]$form.Controls.Add($memoryLabel)
 
-        $textBox = New-Object System.Windows.Forms.TextBox
-        $textBox.Location = New-Object System.Drawing.Point(140, $item[3])
-        $textBox.Size = New-Object System.Drawing.Size(430, 24)
-        $textBox.Text = $envMap[$item[1]]
-        $form.Controls.Add($textBox)
-        $textBoxes[$item[1]] = $textBox
+    $memoryText = New-Object System.Windows.Forms.TextBox
+    $memoryText.Location = New-Object System.Drawing.Point(140, 30)
+    $memoryText.Size = New-Object System.Drawing.Size(430, 24)
+    $memoryText.Text = $envMap["JARVIS_MEMORY_DB_PATH"]
+    [void]$form.Controls.Add($memoryText)
 
-        $browse = New-Object System.Windows.Forms.Button
-        $browse.Text = "찾기"
-        $browse.Location = New-Object System.Drawing.Point(585, $item[3] - 2)
-        $browse.Size = New-Object System.Drawing.Size(80, 28)
-        if ($item[1] -eq "JARVIS_MEMORY_DB_PATH") {
-            $browse.Add_Click({ Select-MemoryDb $textBoxes["JARVIS_MEMORY_DB_PATH"] })
-        } else {
-            $key = $item[1]
-            $browse.Add_Click({ Select-Folder $textBoxes[$key] }.GetNewClosure())
-        }
-        $form.Controls.Add($browse)
-    }
+    $memoryBrowse = New-Object System.Windows.Forms.Button
+    $memoryBrowse.Text = "Browse"
+    $memoryBrowse.Location = New-Object System.Drawing.Point(585, 28)
+    $memoryBrowse.Size = New-Object System.Drawing.Size(80, 28)
+    $memoryBrowse.Add_Click({ Select-MemoryDb -Target $memoryText })
+    [void]$form.Controls.Add($memoryBrowse)
+
+    $downloadLabel = New-Object System.Windows.Forms.Label
+    $downloadLabel.Text = "Downloads"
+    $downloadLabel.Location = New-Object System.Drawing.Point(20, 90)
+    $downloadLabel.Size = New-Object System.Drawing.Size(110, 24)
+    [void]$form.Controls.Add($downloadLabel)
+
+    $downloadText = New-Object System.Windows.Forms.TextBox
+    $downloadText.Location = New-Object System.Drawing.Point(140, 90)
+    $downloadText.Size = New-Object System.Drawing.Size(430, 24)
+    $downloadText.Text = $envMap["JARVIS_DOWNLOADS_DIR"]
+    [void]$form.Controls.Add($downloadText)
+
+    $downloadBrowse = New-Object System.Windows.Forms.Button
+    $downloadBrowse.Text = "Browse"
+    $downloadBrowse.Location = New-Object System.Drawing.Point(585, 88)
+    $downloadBrowse.Size = New-Object System.Drawing.Size(80, 28)
+    $downloadBrowse.Add_Click({ Select-Folder -Target $downloadText })
+    [void]$form.Controls.Add($downloadBrowse)
+
+    $projectLabel = New-Object System.Windows.Forms.Label
+    $projectLabel.Text = "Projects"
+    $projectLabel.Location = New-Object System.Drawing.Point(20, 150)
+    $projectLabel.Size = New-Object System.Drawing.Size(110, 24)
+    [void]$form.Controls.Add($projectLabel)
+
+    $projectText = New-Object System.Windows.Forms.TextBox
+    $projectText.Location = New-Object System.Drawing.Point(140, 150)
+    $projectText.Size = New-Object System.Drawing.Size(430, 24)
+    $projectText.Text = $envMap["JARVIS_PROJECTS_DIR"]
+    [void]$form.Controls.Add($projectText)
+
+    $projectBrowse = New-Object System.Windows.Forms.Button
+    $projectBrowse.Text = "Browse"
+    $projectBrowse.Location = New-Object System.Drawing.Point(585, 148)
+    $projectBrowse.Size = New-Object System.Drawing.Size(80, 28)
+    $projectBrowse.Add_Click({ Select-Folder -Target $projectText })
+    [void]$form.Controls.Add($projectBrowse)
 
     $hint = New-Object System.Windows.Forms.Label
-    $hint.Text = "비워 두면 기본값을 사용합니다. 저장 후 새로 실행되는 Jarvis 명령부터 적용됩니다."
+    $hint.Text = "Leave blank to use defaults. Changes apply to newly started Jarvis commands."
     $hint.Location = New-Object System.Drawing.Point(20, 205)
     $hint.Size = New-Object System.Drawing.Size(650, 24)
-    $form.Controls.Add($hint)
+    [void]$form.Controls.Add($hint)
 
     $save = New-Object System.Windows.Forms.Button
-    $save.Text = "저장"
+    $save.Text = "Save"
     $save.Location = New-Object System.Drawing.Point(420, 240)
     $save.Size = New-Object System.Drawing.Size(110, 36)
     $save.Add_Click({
-        Write-EnvMap @{
-            "JARVIS_MEMORY_DB_PATH" = $textBoxes["JARVIS_MEMORY_DB_PATH"].Text
-            "JARVIS_DOWNLOADS_DIR" = $textBoxes["JARVIS_DOWNLOADS_DIR"].Text
-            "JARVIS_PROJECTS_DIR" = $textBoxes["JARVIS_PROJECTS_DIR"].Text
-        }
-        [System.Windows.Forms.MessageBox]::Show("설정을 저장했습니다.", "Jarvis", "OK", "Information") | Out-Null
+        $updates = @{}
+        $updates["JARVIS_MEMORY_DB_PATH"] = $memoryText.Text
+        $updates["JARVIS_DOWNLOADS_DIR"] = $downloadText.Text
+        $updates["JARVIS_PROJECTS_DIR"] = $projectText.Text
+        Write-EnvMap -Updates $updates
+        [System.Windows.Forms.MessageBox]::Show("Settings saved.", "Jarvis", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
         $form.Close()
     })
-    $form.Controls.Add($save)
+    [void]$form.Controls.Add($save)
 
     $cancel = New-Object System.Windows.Forms.Button
-    $cancel.Text = "취소"
+    $cancel.Text = "Cancel"
     $cancel.Location = New-Object System.Drawing.Point(550, 240)
     $cancel.Size = New-Object System.Drawing.Size(110, 36)
     $cancel.Add_Click({ $form.Close() })
-    $form.Controls.Add($cancel)
+    [void]$form.Controls.Add($cancel)
 
     [void]$form.ShowDialog()
 }
 
 function Show-MainForm {
     $form = New-Object System.Windows.Forms.Form
-    $form.Text = "Jarvis 제어판"
+    $form.Text = "Jarvis Control Panel"
     $form.Size = New-Object System.Drawing.Size(650, 540)
     $form.StartPosition = "CenterScreen"
+    $form.FormBorderStyle = "FixedSingle"
+    $form.MaximizeBox = $false
 
     $title = New-Object System.Windows.Forms.Label
-    $title.Text = "Jarvis 제어판 - 명령어를 몰라도 버튼으로 실행하세요"
+    $title.Text = "Jarvis Control Panel"
     $title.Location = New-Object System.Drawing.Point(20, 20)
     $title.Size = New-Object System.Drawing.Size(560, 28)
-    $title.Font = New-Object System.Drawing.Font("맑은 고딕", 11, [System.Drawing.FontStyle]::Bold)
-    $form.Controls.Add($title)
+    $title.Font = New-Object System.Drawing.Font("Segoe UI", 12, [System.Drawing.FontStyle]::Bold)
+    [void]$form.Controls.Add($title)
 
-    $buttons = @(
-        @("전체 테스트", 20, 70, { Invoke-JarvisCommand "selftest" }),
-        @("메모장 열기", 220, 70, { Invoke-JarvisCommand "run notepad" }),
-        @("계산기 열기", 420, 70, { Invoke-JarvisCommand "calc" }),
-        @("PDF 생성", 20, 130, { Invoke-JarvisCommand "pdf `"GUI 테스트`"" }),
-        @("엑셀 생성", 220, 130, { Invoke-JarvisCommand "excel `"GUI 테스트`"" }),
-        @("워드 생성", 420, 130, { Invoke-JarvisCommand "word `"GUI 테스트`"" }),
-        @("다운로드 정리", 20, 190, { Invoke-JarvisCommand "organize" }),
-        @("인터넷 검색", 220, 190, { Invoke-JarvisCommand "web `"Jarvis 사용법`"" }),
-        @("장기 기억 보기", 420, 190, { Invoke-JarvisCommand "memory" }),
-        @("장기기억 저장 테스트", 20, 250, { Invoke-JarvisCommand "`"장기 기억 GUI 테스트`"" }),
-        @("음성 대기 시작", 220, 250, { Invoke-JarvisCommand "listen" }),
-        @("설정 열기", 420, 250, { Show-SettingsForm }),
-        @("시작 자동 실행 등록", 20, 310, { Invoke-JarvisCommand "startup install" }),
-        @("시작 자동 실행 제거", 220, 310, { Invoke-JarvisCommand "startup remove" })
-    )
-    foreach ($entry in $buttons) {
-        $form.Controls.Add((New-Button $entry[0] $entry[1] $entry[2] $entry[3]))
-    }
+    Add-Button -Form $form -Text "Run Self Test" -X 20 -Y 70 -Action { Invoke-JarvisCommand "selftest" }
+    Add-Button -Form $form -Text "Open Notepad" -X 220 -Y 70 -Action { Invoke-JarvisCommand "run notepad" }
+    Add-Button -Form $form -Text "Open Calculator" -X 420 -Y 70 -Action { Invoke-JarvisCommand "calc" }
+
+    Add-Button -Form $form -Text "Create PDF" -X 20 -Y 130 -Action { Invoke-JarvisCommand "pdf GUI-test" }
+    Add-Button -Form $form -Text "Create Excel" -X 220 -Y 130 -Action { Invoke-JarvisCommand "excel GUI-test" }
+    Add-Button -Form $form -Text "Create Word" -X 420 -Y 130 -Action { Invoke-JarvisCommand "word GUI-test" }
+
+    Add-Button -Form $form -Text "Organize Downloads" -X 20 -Y 190 -Action { Invoke-JarvisCommand "organize" }
+    Add-Button -Form $form -Text "Web Search" -X 220 -Y 190 -Action { Invoke-JarvisCommand "web Jarvis usage" }
+    Add-Button -Form $form -Text "Memory Status" -X 420 -Y 190 -Action { Invoke-JarvisCommand "memory" }
+
+    Add-Button -Form $form -Text "Save Memory Test" -X 20 -Y 250 -Action { Invoke-JarvisCommand "memory test from GUI" }
+    Add-Button -Form $form -Text "Start Voice" -X 220 -Y 250 -Action { Invoke-JarvisCommand "listen" }
+    Add-Button -Form $form -Text "Settings" -X 420 -Y 250 -Action { Show-SettingsForm }
+
+    Add-Button -Form $form -Text "Enable Startup" -X 20 -Y 310 -Action { Invoke-JarvisCommand "startup install" }
+    Add-Button -Form $form -Text "Disable Startup" -X 220 -Y 310 -Action { Invoke-JarvisCommand "startup remove" }
 
     $commandLabel = New-Object System.Windows.Forms.Label
-    $commandLabel.Text = "직접 명령 입력:"
+    $commandLabel.Text = "Command:"
     $commandLabel.Location = New-Object System.Drawing.Point(20, 375)
-    $commandLabel.Size = New-Object System.Drawing.Size(120, 24)
-    $form.Controls.Add($commandLabel)
+    $commandLabel.Size = New-Object System.Drawing.Size(100, 24)
+    [void]$form.Controls.Add($commandLabel)
 
     $commandBox = New-Object System.Windows.Forms.TextBox
     $commandBox.Location = New-Object System.Drawing.Point(135, 372)
     $commandBox.Size = New-Object System.Drawing.Size(340, 24)
-    $commandBox.Text = "자비스"
-    $form.Controls.Add($commandBox)
+    $commandBox.Text = "jarvis"
+    [void]$form.Controls.Add($commandBox)
 
     $runCommand = New-Object System.Windows.Forms.Button
-    $runCommand.Text = "실행"
+    $runCommand.Text = "Run"
     $runCommand.Location = New-Object System.Drawing.Point(490, 368)
     $runCommand.Size = New-Object System.Drawing.Size(110, 32)
     $runCommand.Add_Click({
         $command = $commandBox.Text.Trim()
-        if (-not $command) {
-            [System.Windows.Forms.MessageBox]::Show("실행할 명령을 입력하세요.", "Jarvis", "OK", "Warning") | Out-Null
+        if ($command.Length -eq 0) {
+            [System.Windows.Forms.MessageBox]::Show("Enter a command first.", "Jarvis", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
             return
         }
-        if ($command -eq "자비스" -or $command.ToLowerInvariant() -eq "jarvis") {
-            [System.Windows.Forms.MessageBox]::Show("자비스가 준비되었습니다. 아래 버튼을 누르거나 명령을 입력하세요.", "Jarvis", "OK", "Information") | Out-Null
+        if (($command -eq "jarvis") -or ($command -eq "Jarvis")) {
+            [System.Windows.Forms.MessageBox]::Show("Jarvis is ready. Click a button or enter a command.", "Jarvis", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
             return
         }
-        Invoke-JarvisCommand "`"$command`""
+        Invoke-JarvisCommand ("`"{0}`"" -f $command)
     })
-    $form.Controls.Add($runCommand)
+    [void]$form.Controls.Add($runCommand)
 
     $close = New-Object System.Windows.Forms.Button
-    $close.Text = "닫기"
+    $close.Text = "Close"
     $close.Location = New-Object System.Drawing.Point(480, 440)
     $close.Size = New-Object System.Drawing.Size(120, 36)
     $close.Add_Click({ $form.Close() })
-    $form.Controls.Add($close)
+    [void]$form.Controls.Add($close)
 
     [void]$form.ShowDialog()
 }

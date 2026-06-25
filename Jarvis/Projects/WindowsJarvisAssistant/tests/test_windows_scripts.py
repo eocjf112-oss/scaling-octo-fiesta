@@ -41,18 +41,25 @@ class WindowsScriptsTests(unittest.TestCase):
         content = (root / "scripts" / "windows" / "jarvis-gui.ps1").read_text(encoding="utf-8")
 
         for label in (
-            "메모장 열기",
-            "계산기 열기",
-            "PDF 생성",
-            "엑셀 생성",
-            "워드 생성",
-            "다운로드 정리",
-            "인터넷 검색",
-            "장기 기억 보기",
-            "장기기억 저장 테스트",
-            "직접 명령 입력",
+            "Jarvis Control Panel",
+            "Open Notepad",
+            "Open Calculator",
+            "Create PDF",
+            "Create Excel",
+            "Create Word",
+            "Organize Downloads",
+            "Web Search",
+            "Memory Status",
+            "Save Memory Test",
+            "Command:",
         ):
             self.assertIn(label, content)
+
+    def test_gui_script_has_no_utf8_bom(self):
+        root = Path(__file__).resolve().parents[1]
+        data = (root / "scripts" / "windows" / "jarvis-gui.ps1").read_bytes()
+
+        self.assertFalse(data.startswith(b"\xef\xbb\xbf"))
 
 
 if __name__ == "__main__":
