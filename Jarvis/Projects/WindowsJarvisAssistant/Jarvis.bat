@@ -89,6 +89,24 @@ if errorlevel 1 (
     exit /b %ERRORLEVEL%
 )
 powershell -NoProfile -ExecutionPolicy Bypass -STA -File "%JARVIS_DIR%scripts\windows\jarvis-tray.ps1"
+if errorlevel 1 goto tray_fallback
+exit /b %ERRORLEVEL%
+
+:tray_fallback
+echo Tray mode failed. Falling back to GUI mode...
+powershell -NoProfile -ExecutionPolicy Bypass -STA -File "%JARVIS_DIR%scripts\windows\jarvis-gui.ps1"
+if errorlevel 1 goto cli_fallback
+exit /b 0
+
+:cli_fallback
+echo GUI mode failed. Falling back to CLI status mode...
+call :python_cmd
+if errorlevel 1 (
+    pause
+    exit /b %ERRORLEVEL%
+)
+%JARVIS_PYTHON% -m jarvis_assistant --test-providers
+pause
 exit /b %ERRORLEVEL%
 
 :gui_start
