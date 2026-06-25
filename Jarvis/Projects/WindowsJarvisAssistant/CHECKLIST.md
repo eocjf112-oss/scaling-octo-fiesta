@@ -13,6 +13,9 @@
 - [x] Claude Provider 어댑터 추가
 - [x] Open Interpreter Provider 어댑터 추가
 - [x] 환경 변수 기반 설정 로더 추가
+- [x] `.env` 자동 로딩 추가
+- [x] OpenAI/Anthropic API 키 입력 위치 문서화
+- [x] ChatGPT, Claude, Open Interpreter Provider 우선순위 설정 추가
 - [x] Provider Registry와 자동 Router 추가
 - [x] CLI 진입점 추가
 - [x] Windows PowerShell 실행 스크립트 추가

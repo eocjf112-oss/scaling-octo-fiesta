@@ -155,6 +155,22 @@ Git 브랜치: cursor/jarvis-workspace-setup-b80e
 - 실행 전 명령 Preview 및 승인 UI 설계
 - Open Interpreter 실패/타임아웃 복구 정책 추가
 
+### 세션 004 — 2026년 6월 25일
+**목표:** OpenAI, Anthropic, Open Interpreter 통합 환경 설정 준비
+
+**완료 작업:**
+- `.env.example`을 한국어 설명 중심으로 정리
+- OpenAI API 키와 Anthropic API 키 입력 위치를 빈 값으로 표시
+- 로컬 `.env` 파일 생성: 실제 키는 비워둠
+- 보안을 위해 `.env`는 Git 제외 상태 유지
+- Jarvis CLI가 프로젝트 `.env`를 자동 로딩하도록 설정 로더 개선
+- `JARVIS_PROVIDER_PRIORITY`를 추가해 ChatGPT, Claude, Open Interpreter가 하나의 Jarvis Router에서 함께 동작할 준비 완료
+
+**다음 세션 목표:**
+- 실제 API 키가 설정된 환경에서 ChatGPT/Claude Provider smoke test
+- Provider별 실패 fallback 정책 강화
+- 통합 대화 모드에서 세 Provider를 선택/전환하는 UX 추가
+
 ---
 
 ## 📝 메모 및 아이디어 (Notes & Ideas)

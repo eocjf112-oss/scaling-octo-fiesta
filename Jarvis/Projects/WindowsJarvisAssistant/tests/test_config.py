@@ -1,5 +1,6 @@
 import os
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -15,6 +16,7 @@ class JarvisConfigTests(unittest.TestCase):
             config = JarvisConfig.from_env()
 
         self.assertEqual(config.default_provider, "chatgpt")
+        self.assertEqual(config.provider_priority, ("chatgpt", "claude", "open_interpreter"))
         self.assertEqual(config.openai_model, "gpt-4o-mini")
         self.assertEqual(config.anthropic_model, "claude-3-5-sonnet-latest")
         self.assertEqual(config.open_interpreter_timeout_seconds, 120)
@@ -24,6 +26,7 @@ class JarvisConfigTests(unittest.TestCase):
     def test_from_env_reads_overrides(self):
         env = {
             "JARVIS_DEFAULT_PROVIDER": "claude",
+            "JARVIS_PROVIDER_PRIORITY": "claude,chatgpt,open_interpreter",
             "JARVIS_WORKSPACE_ROOT": str(Path("/tmp/jarvis-root")),
             "OPENAI_API_KEY": "openai-key",
             "JARVIS_OPENAI_MODEL": "gpt-test",
@@ -40,6 +43,7 @@ class JarvisConfigTests(unittest.TestCase):
             config = JarvisConfig.from_env()
 
         self.assertEqual(config.default_provider, "claude")
+        self.assertEqual(config.provider_priority, ("claude", "chatgpt", "open_interpreter"))
         self.assertEqual(config.workspace_root, Path("/tmp/jarvis-root"))
         self.assertEqual(config.openai_api_key, "openai-key")
         self.assertEqual(config.openai_model, "gpt-test")
@@ -49,6 +53,37 @@ class JarvisConfigTests(unittest.TestCase):
         self.assertEqual(config.open_interpreter_timeout_seconds, 30)
         self.assertTrue(config.open_interpreter_auto_yes)
         self.assertFalse(config.open_interpreter_require_confirmation)
+
+    def test_from_env_loads_env_file_without_overriding_existing_environment(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            env_path = Path(temp_dir) / ".env"
+            env_path.write_text(
+                "\n".join(
+                    [
+                        "OPENAI_API_KEY=from-env-file",
+                        "ANTHROPIC_API_KEY=from-env-file",
+                        "JARVIS_DEFAULT_PROVIDER=claude",
+                        "JARVIS_PROVIDER_PRIORITY=claude,chatgpt",
+                    ]
+                ),
+                encoding="utf-8",
+            )
+
+            with patch.dict(
+                os.environ,
+                {
+                    "JARVIS_ENV_FILE": str(env_path),
+                    "OPENAI_API_KEY": "from-process",
+                },
+                clear=True,
+            ):
+                config = JarvisConfig.from_env()
+
+        self.assertEqual(config.env_file, env_path)
+        self.assertEqual(config.openai_api_key, "from-process")
+        self.assertEqual(config.anthropic_api_key, "from-env-file")
+        self.assertEqual(config.default_provider, "claude")
+        self.assertEqual(config.provider_priority, ("claude", "chatgpt"))
 
 
 if __name__ == "__main__":

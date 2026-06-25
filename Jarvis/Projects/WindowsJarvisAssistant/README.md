@@ -61,23 +61,32 @@ python -m pip install -e ".[interpreter]"
 
 ### 2. 환경 변수 설정
 
-`.env.example`을 참고해 Windows 사용자 환경 변수 또는 PowerShell 세션 환경 변수로 설정합니다.
+`.env.example`을 참고해 `.env`를 생성합니다. Jarvis CLI는 프로젝트 루트의 `.env`를 자동으로 읽습니다.
 
 ```powershell
-$env:OPENAI_API_KEY = "..."
-$env:ANTHROPIC_API_KEY = "..."
-$env:JARVIS_DEFAULT_PROVIDER = "chatgpt"
-$env:JARVIS_WORKSPACE_ROOT = "C:\Users\you\Jarvis"
+Copy-Item .env.example .env
+```
+
+`.env`에서 아래 위치에 실제 키를 입력합니다. 현재 저장소의 예시 파일과 로컬 `.env`는 모두 빈 값으로 유지합니다.
+
+```powershell
+OPENAI_API_KEY=
+ANTHROPIC_API_KEY=
+JARVIS_DEFAULT_PROVIDER=chatgpt
+JARVIS_PROVIDER_PRIORITY=chatgpt,claude,open_interpreter
+JARVIS_WORKSPACE_ROOT=C:\Users\you\Jarvis
 ```
 
 Open Interpreter CLI를 사용할 경우:
 
 ```powershell
 python -m pip install -e ".[interpreter]"
-$env:JARVIS_OPEN_INTERPRETER_COMMAND = ".\.venv\Scripts\interpreter.exe"
-$env:JARVIS_OPEN_INTERPRETER_WORKDIR = "C:\Users\you\Jarvis\Temp\OpenInterpreter"
-$env:JARVIS_OPEN_INTERPRETER_REQUIRE_CONFIRMATION = "true"
+JARVIS_OPEN_INTERPRETER_COMMAND=.\.venv\Scripts\interpreter.exe
+JARVIS_OPEN_INTERPRETER_WORKDIR=C:\Users\you\Jarvis\Temp\OpenInterpreter
+JARVIS_OPEN_INTERPRETER_REQUIRE_CONFIRMATION=true
 ```
+
+운영체제 환경 변수가 이미 설정되어 있으면 `.env`보다 우선합니다.
 
 ### 3. 실행
 

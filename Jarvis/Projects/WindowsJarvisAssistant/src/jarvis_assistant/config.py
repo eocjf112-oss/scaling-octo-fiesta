@@ -22,10 +22,20 @@ def _get_int(name: str, default: int) -> int:
         raise ValueError(f"{name} must be an integer.") from exc
 
 
+def _get_tuple(name: str, default: tuple[str, ...]) -> tuple[str, ...]:
+    value = os.getenv(name)
+    if value is None or value.strip() == "":
+        return default
+    values = tuple(item.strip() for item in value.split(",") if item.strip())
+    return values or default
+
+
 @dataclass(frozen=True)
 class JarvisConfig:
     default_provider: str = "chatgpt"
+    provider_priority: tuple[str, ...] = ("chatgpt", "claude", "open_interpreter")
     workspace_root: Path = Path.cwd()
+    env_file: Path | None = None
     openai_api_key: str | None = None
     openai_model: str = "gpt-4o-mini"
     anthropic_api_key: str | None = None
@@ -38,10 +48,15 @@ class JarvisConfig:
 
     @classmethod
     def from_env(cls) -> "JarvisConfig":
+        env_file = load_env_file()
         workspace_root = _get_path("JARVIS_WORKSPACE_ROOT") or _discover_workspace_root()
         return cls(
             default_provider=os.getenv("JARVIS_DEFAULT_PROVIDER", "chatgpt").strip() or "chatgpt",
+            provider_priority=_get_tuple(
+                "JARVIS_PROVIDER_PRIORITY", ("chatgpt", "claude", "open_interpreter")
+            ),
             workspace_root=workspace_root,
+            env_file=env_file,
             openai_api_key=os.getenv("OPENAI_API_KEY") or None,
             openai_model=os.getenv("JARVIS_OPENAI_MODEL", "gpt-4o-mini").strip() or "gpt-4o-mini",
             anthropic_api_key=os.getenv("ANTHROPIC_API_KEY") or None,
@@ -69,6 +84,47 @@ def _get_path(name: str) -> Path | None:
     if value is None or value.strip() == "":
         return None
     return Path(value).expanduser().resolve()
+
+
+def load_env_file() -> Path | None:
+    env_file = _find_env_file()
+    if env_file is None:
+        return None
+
+    for raw_line in env_file.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        key = key.strip()
+        if not key or key in os.environ:
+            continue
+        os.environ[key] = _clean_env_value(value)
+
+    return env_file
+
+
+def _find_env_file() -> Path | None:
+    explicit = _get_path("JARVIS_ENV_FILE")
+    if explicit is not None:
+        return explicit if explicit.is_file() else None
+
+    project_root = Path(__file__).resolve().parents[2]
+    candidates = (
+        Path.cwd().resolve() / ".env",
+        project_root / ".env",
+    )
+    for candidate in candidates:
+        if candidate.is_file():
+            return candidate
+    return None
+
+
+def _clean_env_value(value: str) -> str:
+    value = value.strip()
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
+        return value[1:-1]
+    return value
 
 
 def _discover_workspace_root() -> Path:

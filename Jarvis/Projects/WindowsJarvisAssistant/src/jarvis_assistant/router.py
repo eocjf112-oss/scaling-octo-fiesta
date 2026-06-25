@@ -53,7 +53,7 @@ class JarvisRouter:
         if self._config.default_provider in available:
             return self._config.default_provider
 
-        for candidate in ("chatgpt", "claude", "open_interpreter"):
+        for candidate in self._config.provider_priority:
             if candidate in available:
                 return candidate
 

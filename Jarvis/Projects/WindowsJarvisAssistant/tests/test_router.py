@@ -39,6 +39,20 @@ class JarvisRouterTests(unittest.TestCase):
 
         self.assertEqual(selected, "claude")
 
+    def test_auto_uses_configured_priority_when_default_is_unavailable(self):
+        registry = ProviderRegistry([FakeProvider("chatgpt"), FakeProvider("claude")])
+        router = JarvisRouter(
+            JarvisConfig(
+                default_provider="open_interpreter",
+                provider_priority=("claude", "chatgpt", "open_interpreter"),
+            ),
+            registry,
+        )
+
+        selected = router.select_provider(ChatRequest(prompt="문서를 요약해줘"))
+
+        self.assertEqual(selected, "claude")
+
     def test_auto_routes_local_actions_to_open_interpreter(self):
         registry = ProviderRegistry(
             [
