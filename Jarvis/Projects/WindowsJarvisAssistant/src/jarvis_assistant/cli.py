@@ -1,0 +1,59 @@
+from __future__ import annotations
+
+import argparse
+import sys
+
+from jarvis_assistant.config import JarvisConfig
+from jarvis_assistant.models import ChatRequest, ProviderError
+from jarvis_assistant.router import JarvisRouter
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description="Windows Jarvis AI Assistant")
+    parser.add_argument("prompt", nargs="?", help="Jarvis에 전달할 요청")
+    parser.add_argument(
+        "--provider",
+        default="auto",
+        choices=["auto", "chatgpt", "claude", "open_interpreter"],
+        help="사용할 Provider",
+    )
+    parser.add_argument("--system", dest="system_prompt", help="시스템 프롬프트")
+    parser.add_argument("--temperature", type=float, help="모델 temperature")
+    parser.add_argument(
+        "--list-providers",
+        action="store_true",
+        help="현재 사용 가능한 Provider 목록 출력",
+    )
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = build_parser()
+    args = parser.parse_args(argv)
+
+    config = JarvisConfig.from_env()
+    router = JarvisRouter(config)
+
+    if args.list_providers:
+        providers = router.available_providers()
+        print("\n".join(providers) if providers else "No providers available.")
+        return 0
+
+    if not args.prompt:
+        parser.error("prompt is required unless --list-providers is used.")
+
+    request = ChatRequest(
+        prompt=args.prompt,
+        provider=args.provider,
+        system_prompt=args.system_prompt,
+        temperature=args.temperature,
+    )
+
+    try:
+        response = router.dispatch(request)
+    except ProviderError as exc:
+        print(f"Jarvis error: {exc}", file=sys.stderr)
+        return 1
+
+    print(response.content)
+    return 0

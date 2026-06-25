@@ -1,0 +1,102 @@
+# Windows Jarvis AI Assistant
+
+Windows Jarvis AI Assistant는 Open Interpreter, ChatGPT, Claude를 하나의 로컬 AI 비서 시스템으로 연결하기 위한 프로젝트입니다.
+
+## 목표
+
+- **ChatGPT**: 일반 대화, 문서 작성, 코드 설명, 빠른 질의응답
+- **Claude**: 긴 문맥 분석, 설계 검토, 문서/코드 리뷰
+- **Open Interpreter**: Windows 로컬 파일, 명령, 자동화 작업 실행
+- **Jarvis Router**: 사용자 요청을 적절한 Provider로 라우팅하고 같은 인터페이스로 응답 반환
+
+## 현재 구현 범위
+
+첫 번째 단계로 Provider 통합 코어를 구현했습니다.
+
+```text
+WindowsJarvisAssistant/
+├── CHECKLIST.md
+├── README.md
+├── pyproject.toml
+├── .env.example
+├── scripts/windows/run-jarvis.ps1
+├── src/jarvis_assistant/
+│   ├── cli.py
+│   ├── config.py
+│   ├── models.py
+│   ├── router.py
+│   └── providers/
+│       ├── anthropic_provider.py
+│       ├── open_interpreter_provider.py
+│       ├── openai_provider.py
+│       └── registry.py
+└── tests/
+```
+
+## 빠른 시작
+
+### 1. Python 환경 준비
+
+```powershell
+cd Jarvis\Projects\WindowsJarvisAssistant
+py -3.11 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -e .
+```
+
+실제 ChatGPT/Claude SDK 연동이 필요하면 다음 선택 의존성을 설치합니다.
+
+```powershell
+python -m pip install -e ".[ai]"
+```
+
+### 2. 환경 변수 설정
+
+`.env.example`을 참고해 Windows 사용자 환경 변수 또는 PowerShell 세션 환경 변수로 설정합니다.
+
+```powershell
+$env:OPENAI_API_KEY = "..."
+$env:ANTHROPIC_API_KEY = "..."
+$env:JARVIS_DEFAULT_PROVIDER = "chatgpt"
+```
+
+Open Interpreter CLI를 사용할 경우:
+
+```powershell
+python -m pip install open-interpreter
+$env:JARVIS_OPEN_INTERPRETER_COMMAND = "interpreter"
+```
+
+### 3. 실행
+
+```powershell
+python -m jarvis_assistant "오늘 할 일을 정리해줘"
+python -m jarvis_assistant --provider claude "이 설계를 검토해줘"
+python -m jarvis_assistant --provider open_interpreter "현재 폴더의 파일 목록을 요약해줘"
+```
+
+Windows PowerShell 래퍼:
+
+```powershell
+.\scripts\windows\run-jarvis.ps1 -Prompt "내 PC 상태를 점검해줘" -Provider auto
+```
+
+## Provider 선택 규칙
+
+`--provider auto`는 다음 순서로 Provider를 선택합니다.
+
+1. 로컬 파일/명령/Windows 자동화 성격이면 Open Interpreter
+2. 기본 Provider(`JARVIS_DEFAULT_PROVIDER`)가 사용 가능하면 기본 Provider
+3. 사용 가능한 Provider 중 ChatGPT, Claude, Open Interpreter 순서로 선택
+
+## 테스트
+
+```powershell
+python -m unittest discover -s tests
+```
+
+## 보안 메모
+
+- API 키는 코드나 문서에 저장하지 않습니다.
+- Open Interpreter는 로컬 명령을 실행할 수 있으므로 신뢰 가능한 프롬프트에만 사용합니다.
+- 로그에는 민감한 정보가 남지 않도록 별도 Sanitizer를 다음 단계에서 추가합니다.

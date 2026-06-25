@@ -38,7 +38,7 @@
 
 ### 진행 중인 작업
 - [ ] 사용자 프로필 완성
-- [ ] 첫 번째 프로젝트 시작
+- [x] 첫 번째 프로젝트 시작: Windows Jarvis AI Assistant
 - [ ] 자동화 스크립트 설정
 
 ---
@@ -48,7 +48,7 @@
 | 프로젝트 이름 | 상태 | 우선순위 | 마지막 업데이트 |
 |--------------|------|---------|----------------|
 | Jarvis 워크스페이스 설정 | ✅ 완료 | 높음 | 2026-06-25 |
-| *(다음 프로젝트)* | - | - | - |
+| Windows Jarvis AI Assistant | 진행 중 | 높음 | 2026-06-25 |
 
 ---
 
@@ -122,6 +122,21 @@ Git 브랜치: cursor/jarvis-workspace-setup-b80e
 **다음 세션 목표:**
 - 사용자 프로필 업데이트
 - 첫 번째 실제 프로젝트 착수
+
+### 세션 002 — 2026년 6월 25일
+**목표:** Windows용 Jarvis AI Assistant 시작
+
+**완료 작업:**
+- `Jarvis/Projects/WindowsJarvisAssistant` 프로젝트 생성
+- ChatGPT, Claude, Open Interpreter를 공통 Provider 인터페이스로 연결하는 코어 스캐폴드 구현
+- 환경 변수 기반 설정, Provider Registry, 자동 Router, CLI 진입점 추가
+- Windows PowerShell 실행 스크립트와 기본 단위 테스트 추가
+- 단계별 실행 체크리스트 작성
+
+**다음 세션 목표:**
+- CLI 대화형 모드 추가
+- Open Interpreter 안전 승인 레이어 설계
+- 대화 메모리 저장소 최소 구현
 
 ---
 
