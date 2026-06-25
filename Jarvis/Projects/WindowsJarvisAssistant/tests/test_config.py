@@ -19,29 +19,36 @@ class JarvisConfigTests(unittest.TestCase):
         self.assertEqual(config.anthropic_model, "claude-3-5-sonnet-latest")
         self.assertEqual(config.open_interpreter_timeout_seconds, 120)
         self.assertFalse(config.open_interpreter_auto_yes)
+        self.assertTrue(config.open_interpreter_require_confirmation)
 
     def test_from_env_reads_overrides(self):
         env = {
             "JARVIS_DEFAULT_PROVIDER": "claude",
+            "JARVIS_WORKSPACE_ROOT": str(Path("/tmp/jarvis-root")),
             "OPENAI_API_KEY": "openai-key",
             "JARVIS_OPENAI_MODEL": "gpt-test",
             "ANTHROPIC_API_KEY": "anthropic-key",
             "JARVIS_ANTHROPIC_MODEL": "claude-test",
             "JARVIS_OPEN_INTERPRETER_COMMAND": "interpreter",
+            "JARVIS_OPEN_INTERPRETER_WORKDIR": str(Path("/tmp/jarvis-root/Temp/OpenInterpreter")),
             "JARVIS_OPEN_INTERPRETER_TIMEOUT_SECONDS": "30",
             "JARVIS_OPEN_INTERPRETER_AUTO_YES": "true",
+            "JARVIS_OPEN_INTERPRETER_REQUIRE_CONFIRMATION": "false",
         }
 
         with patch.dict(os.environ, env, clear=True):
             config = JarvisConfig.from_env()
 
         self.assertEqual(config.default_provider, "claude")
+        self.assertEqual(config.workspace_root, Path("/tmp/jarvis-root"))
         self.assertEqual(config.openai_api_key, "openai-key")
         self.assertEqual(config.openai_model, "gpt-test")
         self.assertEqual(config.anthropic_api_key, "anthropic-key")
         self.assertEqual(config.anthropic_model, "claude-test")
+        self.assertEqual(config.open_interpreter_workdir, Path("/tmp/jarvis-root/Temp/OpenInterpreter"))
         self.assertEqual(config.open_interpreter_timeout_seconds, 30)
         self.assertTrue(config.open_interpreter_auto_yes)
+        self.assertFalse(config.open_interpreter_require_confirmation)
 
 
 if __name__ == "__main__":

@@ -138,6 +138,23 @@ Git 브랜치: cursor/jarvis-workspace-setup-b80e
 - Open Interpreter 안전 승인 레이어 설계
 - 대화 메모리 저장소 최소 구현
 
+### 세션 003 — 2026년 6월 25일
+**목표:** Open Interpreter 안전 연동 시작
+
+**완료 작업:**
+- Python 가상환경 생성 및 Open Interpreter 0.4.3 설치
+- `python3.12-venv` 시스템 패키지 필요 확인 및 설치
+- Open Interpreter CLI 옵션 확인: `--stdin`, `--safe_mode ask`, `--disable_telemetry`, `--plain`
+- `setuptools 82.0.1`에서 `pkg_resources`가 제거되어 Open Interpreter 0.4.3 CLI가 실패하는 호환성 이슈 확인
+- 현재 호환을 위해 `setuptools<81` 제약 필요 확인
+- Jarvis Open Interpreter 안전 정책 구현: 위험 요청 차단, 로컬 실행 확인 플래그, Jarvis 워크스페이스 내부 작업 폴더 제한
+- Open Interpreter 안전 연동 가이드 문서 작성
+
+**다음 세션 목표:**
+- Open Interpreter 실행 로그 Sanitizer 구현
+- 실행 전 명령 Preview 및 승인 UI 설계
+- Open Interpreter 실패/타임아웃 복구 정책 추가
+
 ---
 
 ## 📝 메모 및 아이디어 (Notes & Ideas)

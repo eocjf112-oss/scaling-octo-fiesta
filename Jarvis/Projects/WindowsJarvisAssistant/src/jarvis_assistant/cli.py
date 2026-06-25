@@ -24,6 +24,11 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="현재 사용 가능한 Provider 목록 출력",
     )
+    parser.add_argument(
+        "--confirm-local-execution",
+        action="store_true",
+        help="Open Interpreter가 로컬 파일/명령 작업을 수행할 수 있음을 명시적으로 확인",
+    )
     return parser
 
 
@@ -47,6 +52,7 @@ def main(argv: list[str] | None = None) -> int:
         provider=args.provider,
         system_prompt=args.system_prompt,
         temperature=args.temperature,
+        metadata={"confirm_local_execution": args.confirm_local_execution},
     )
 
     try:

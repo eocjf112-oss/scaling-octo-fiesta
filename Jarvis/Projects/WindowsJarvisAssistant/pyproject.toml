@@ -18,6 +18,16 @@ ai = [
   "anthropic",
   "openai",
 ]
+interpreter = [
+  "open-interpreter",
+  "setuptools<81",
+]
+all = [
+  "anthropic",
+  "open-interpreter",
+  "openai",
+  "setuptools<81",
+]
 
 [project.scripts]
 jarvis-assistant = "jarvis_assistant.cli:main"

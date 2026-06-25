@@ -3,9 +3,17 @@ param(
     [string]$Prompt,
 
     [ValidateSet("auto", "chatgpt", "claude", "open_interpreter")]
-    [string]$Provider = "auto"
+    [string]$Provider = "auto",
+
+    [switch]$ConfirmLocalExecution
 )
 
 $ErrorActionPreference = "Stop"
 
-python -m jarvis_assistant --provider $Provider $Prompt
+$arguments = @("-m", "jarvis_assistant", "--provider", $Provider)
+if ($ConfirmLocalExecution) {
+    $arguments += "--confirm-local-execution"
+}
+$arguments += $Prompt
+
+python @arguments

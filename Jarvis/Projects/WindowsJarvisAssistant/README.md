@@ -19,6 +19,7 @@ WindowsJarvisAssistant/
 ├── README.md
 ├── pyproject.toml
 ├── .env.example
+├── docs/open_interpreter_integration.md
 ├── scripts/windows/run-jarvis.ps1
 ├── src/jarvis_assistant/
 │   ├── cli.py
@@ -50,6 +51,14 @@ python -m pip install -e .
 python -m pip install -e ".[ai]"
 ```
 
+Open Interpreter 연동이 필요하면 다음 선택 의존성을 설치합니다.
+
+```powershell
+python -m pip install -e ".[interpreter]"
+```
+
+> Open Interpreter 0.4.3은 `pkg_resources`를 사용하므로 현재는 `setuptools<81` 호환 설정이 필요합니다. `interpreter` extra에 이 제약을 포함했습니다.
+
 ### 2. 환경 변수 설정
 
 `.env.example`을 참고해 Windows 사용자 환경 변수 또는 PowerShell 세션 환경 변수로 설정합니다.
@@ -58,13 +67,16 @@ python -m pip install -e ".[ai]"
 $env:OPENAI_API_KEY = "..."
 $env:ANTHROPIC_API_KEY = "..."
 $env:JARVIS_DEFAULT_PROVIDER = "chatgpt"
+$env:JARVIS_WORKSPACE_ROOT = "C:\Users\you\Jarvis"
 ```
 
 Open Interpreter CLI를 사용할 경우:
 
 ```powershell
-python -m pip install open-interpreter
-$env:JARVIS_OPEN_INTERPRETER_COMMAND = "interpreter"
+python -m pip install -e ".[interpreter]"
+$env:JARVIS_OPEN_INTERPRETER_COMMAND = ".\.venv\Scripts\interpreter.exe"
+$env:JARVIS_OPEN_INTERPRETER_WORKDIR = "C:\Users\you\Jarvis\Temp\OpenInterpreter"
+$env:JARVIS_OPEN_INTERPRETER_REQUIRE_CONFIRMATION = "true"
 ```
 
 ### 3. 실행
@@ -72,14 +84,16 @@ $env:JARVIS_OPEN_INTERPRETER_COMMAND = "interpreter"
 ```powershell
 python -m jarvis_assistant "오늘 할 일을 정리해줘"
 python -m jarvis_assistant --provider claude "이 설계를 검토해줘"
-python -m jarvis_assistant --provider open_interpreter "현재 폴더의 파일 목록을 요약해줘"
+python -m jarvis_assistant --provider open_interpreter --confirm-local-execution "현재 폴더의 파일 목록을 요약해줘"
 ```
 
 Windows PowerShell 래퍼:
 
 ```powershell
-.\scripts\windows\run-jarvis.ps1 -Prompt "내 PC 상태를 점검해줘" -Provider auto
+.\scripts\windows\run-jarvis.ps1 -Prompt "내 PC 상태를 점검해줘" -Provider auto -ConfirmLocalExecution
 ```
+
+Open Interpreter의 자세한 안전 정책은 `docs/open_interpreter_integration.md`를 참고하세요.
 
 ## Provider 선택 규칙
 
@@ -99,4 +113,6 @@ python -m unittest discover -s tests
 
 - API 키는 코드나 문서에 저장하지 않습니다.
 - Open Interpreter는 로컬 명령을 실행할 수 있으므로 신뢰 가능한 프롬프트에만 사용합니다.
+- Jarvis는 Open Interpreter 실행 전 위험 요청을 차단하고, 로컬 실행 요청에는 `--confirm-local-execution` 확인을 요구합니다.
+- Open Interpreter 작업 디렉터리는 `JARVIS_WORKSPACE_ROOT` 내부로 제한됩니다.
 - 로그에는 민감한 정보가 남지 않도록 별도 Sanitizer를 다음 단계에서 추가합니다.
